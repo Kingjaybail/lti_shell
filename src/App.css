@@ -38,3 +38,7 @@ body, html {
   background: var(--bg2);
   border-bottom: 1px solid var(--border);
 }
+
+.terminal {
+  height: 60vh;
+}
