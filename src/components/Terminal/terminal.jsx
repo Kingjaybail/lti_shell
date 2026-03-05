@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Terminal as XTerm } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
 import "./terminal.css";
+import { runCommand } from "../../router/controller";
 
 export default function Terminal() {
   const containerRef = useRef(null);
@@ -28,7 +29,7 @@ export default function Terminal() {
       if (code === 13) {
         term.write("\r\n");
         const command = currentLine.trim();
-        console.log(command);
+        runCommand(command)
 
         if(currentLine == "clear"){
           term.clear();

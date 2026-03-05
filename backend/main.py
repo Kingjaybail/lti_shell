@@ -19,7 +19,8 @@ def read_hello():
     return {"message": "hello world"}
 
 
-@app.get("/run-command")
-def run_command():
-    data = linux_simulation.run_command("ls")
+@app.post("/run-command")
+def run_command(data: dict):
     print(data)
+    data = linux_simulation.run_command(data['command'])
+    return data
