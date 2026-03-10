@@ -23,13 +23,12 @@ export default function Terminal() {
 
     let currentLine = "";
 
-    const disposable = term.onData((data) => {
+    const disposable = term.onData( async (data) => {
       const code = data.charCodeAt(0);
-
       if (code === 13) {
         term.write("\r\n");
         const command = currentLine.trim();
-        runCommand(command)
+        let commandValue = await runCommand(command)
 
         if(currentLine == "clear"){
           term.clear();
@@ -38,8 +37,14 @@ export default function Terminal() {
           return;
         }
 
+        if(currentLine == "mkdir"){
+          term.clear();
+          currentLine = "";
+          term.write(prompt);
+          return;
+        }
         currentLine = "";
-        term.write(prompt);
+        term.write(`${commandValue.stdout}${prompt}`);
         return;
       }
 

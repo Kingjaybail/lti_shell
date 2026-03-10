@@ -19,7 +19,7 @@ let runCommand = async (command) => {
   });
 
   let data = await response.json();
-  console.log(data);
+  return data;
 }
 
 export { returnBackend, runCommand };

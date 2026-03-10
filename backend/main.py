@@ -24,3 +24,18 @@ def run_command(data: dict):
     print(data)
     data = linux_simulation.run_command(data['command'])
     return data
+
+
+
+
+
+
+
+
+
+"""
+
+Create factorial with a loop
+
+
+"""

@@ -9,8 +9,13 @@ def run_command(command_string):
         args,
         capture_output=True,
         text=True,
-        shell=False
+        shell=False,
+        check=True,
+        cwd="backend/container"
     )
+    
+    if result.stdout:
+        print(result.stdout, end="")
 
     return {
         "stdout": result.stdout,
@@ -18,6 +23,10 @@ def run_command(command_string):
         "code": result.returncode
     }
 
+
+"""
+This is for local testing without running UI
+"""
 def interactive_shell():
     while True:
         try:
@@ -32,3 +41,5 @@ def interactive_shell():
         except KeyboardInterrupt:
             print("\nExiting simulator.")
             break
+        
+interactive_shell()
