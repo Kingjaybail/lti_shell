@@ -1,0 +1,101 @@
+.profRoot{
+  padding:30px;
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+.profHeader{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:25px;
+}
+
+.createBtn{
+  background:#3b82f6;
+  color:white;
+  border:none;
+  padding:10px 16px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.viewStudentBtn{
+  background:#facc15;
+  color:black;
+  border:none;
+  padding:10px 16px;
+  border-radius:6px;
+  cursor:pointer;
+  margin-left:10px;
+}
+
+.assignmentTable{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.assignmentTable th,
+.assignmentTable td{
+  padding:12px;
+  border-bottom:1px solid #ddd;
+}
+
+.assignmentTable button{
+  margin-right:8px;
+  padding:6px 10px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+.assignmentTable button:first-child{
+  background:#10b981;
+  color:white;
+}
+
+.assignmentTable button:last-child{
+  background:#ef4444;
+  color:white;
+}
+
+/* Modal */
+
+.formModal{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.assignmentForm{
+  background:white;
+  padding:25px;
+  border-radius:8px;
+  width:350px;
+  display:flex;
+  flex-direction:column;
+}
+
+.assignmentForm input{
+  margin-bottom:12px;
+  padding:8px;
+}
+
+.formButtons{
+  display:flex;
+  justify-content:space-between;
+}
+
+.viewStudentBtn {
+  background: #facc15;
+  color: black;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 10px;
+}
