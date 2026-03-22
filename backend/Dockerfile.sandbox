@@ -1,0 +1,18 @@
+FROM ubuntu:24.04
+
+# install neccesaryy packages
+RUN apt-get update && apt-get install -y \
+    bash vim nano curl wget git \
+    gcc g++ make \
+    python3 python3-pip \
+    nodejs npm \
+    openjdk-21-jdk-headless \
+    && apt-get clean
+
+# Adds a work user I plan to update the 2nd echo with the students name later on
+RUN useradd -m -s /bin/bash user
+RUN echo 'export TERM=xterm-256color' >> /home/user/.bashrc
+RUN echo 'export PS1="user@lti-shell:~\$ "' >> /home/user/.bashrc
+
+USER user
+WORKDIR /ltiuser

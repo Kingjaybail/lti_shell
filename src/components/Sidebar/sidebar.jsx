@@ -17,8 +17,6 @@ export default function Sidebar() {
         nums = [10, 99, 10, 12, 4]<br/><br/>
 
         result = [10, 99, 12, 4]
-        <br></br>
-        <button onClick={() => returnBackend()}>Test</button>
       </div>
 
       <footer className="sidebarFooter">

@@ -1,8 +1,16 @@
 :root {
-  --bg: #121212;
-  --bg2: #85858598;
-  --border: #2a2a2a;
-  --fg: #e5e5e5;
+  --bg: #1a1a1a;
+  --bg2: #282828;
+  --bg3: #1e1e1e;
+  --border: #3e3e3e;
+  --fg: #eff1f6;
+  --fg2: #8d8d9e;
+  --accent: #ffa116;
+  --tab-h: 36px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 body, html {
@@ -11,34 +19,107 @@ body, html {
   height: 100%;
   background: var(--bg);
   color: var(--fg);
-  font-family: sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
 }
 
 .shell {
   height: 100vh;
   display: grid;
-  grid-template-columns: 260px 1fr;
-  background: var(--bg);
+  grid-template-columns: 300px 1fr;
+  overflow: hidden;
 }
 
+/* Sidebar */
 .sidebarRoot {
   background: var(--bg2);
   border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
+.sidebarTab {
+  height: var(--tab-h);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+}
+
+.sidebarTab span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg2);
+  cursor: pointer;
+  padding-bottom: 2px;
+}
+
+.sidebarTab span.active {
+  color: var(--fg);
+  border-bottom: 2px solid var(--accent);
+}
+
+/* Right panel */
 .right {
   display: grid;
   grid-template-rows: 1fr 1fr;
-  border-left: 1px solid var(--border);
+  overflow: hidden;
+  background: var(--bg3);
+}
+
+/* Terminal panel */
+.terminalPanel {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.panelHeader {
+  height: var(--tab-h);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.panelHeader span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg2);
+  cursor: pointer;
+}
+
+.panelHeader span.active {
+  color: var(--fg);
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 2px;
 }
 
 .terminalHost {
-  width: 100%;
-  height: 100%;
-  background: var(--bg2);
-  border-bottom: 1px solid var(--border);
+  flex: 1;
+  overflow: hidden;
+  padding: 4px;
+  background: #0d0d0d;
 }
 
-.terminal {
-  height: 60vh;
+/* Results panel */
+.resultsPanel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.resultsBody {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  background: var(--bg3);
+  color: var(--fg2);
+  font-size: 13px;
 }
