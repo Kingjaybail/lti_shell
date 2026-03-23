@@ -15,4 +15,4 @@ RUN echo 'export TERM=xterm-256color' >> /home/user/.bashrc
 RUN echo 'export PS1="user@lti-shell:~\$ "' >> /home/user/.bashrc
 
 USER user
-WORKDIR /ltiuser
+WORKDIR /workspace

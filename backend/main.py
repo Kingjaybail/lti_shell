@@ -22,6 +22,7 @@ app.add_middleware(
 def read_hello():
     return {"message": "hello world"}
 
+
 # Initialize terminal object and give it perms / settings 
 @app.websocket("/ws/terminal")
 async def terminal_ws(websocket: WebSocket):
