@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ import for navigation
 import "./professorview.css";
 
 export default function ProfessorView() {
 
-  const navigate = useNavigate(); // ✅ inside the component
+  const navigate = useNavigate();
 
   const [assignments, setAssignments] = useState([
     { id: 1, title: "Remove Array Duplicates", course: "CS240", students: 40 },

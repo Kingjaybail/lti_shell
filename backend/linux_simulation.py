@@ -7,9 +7,9 @@ def run_command(command_string):
 
     result = subprocess.run(
         args,
-        capture_output=True,
-        text=True,
-        shell=False
+        # capture_output=True,
+        # text=True,
+        shell=True
     )
 
     return {
@@ -18,6 +18,11 @@ def run_command(command_string):
         "code": result.returncode
     }
 
+"""
+
+This is for local terminal testing it looks cool dont touch
+
+"""
 def interactive_shell():
     while True:
         try:
@@ -32,3 +37,5 @@ def interactive_shell():
         except KeyboardInterrupt:
             print("\nExiting simulator.")
             break
+
+# interactive_shell()
