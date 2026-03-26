@@ -10,7 +10,7 @@ export default function App() {
     const raw = params.get("lti_claims");
     if (raw) {
       const claims = JSON.parse(atob(raw));
-      console.log("=== LTI Claims from Moodle ===", claims);
+      console.log("From Moodle", claims);
     }
   }, []);
 
