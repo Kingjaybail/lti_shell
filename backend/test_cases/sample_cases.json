@@ -1,0 +1,41 @@
+{
+  "language": "python",
+  "test_cases": [
+    {
+      "id": 1,
+      "description": "Basic array with duplicates",
+      "input": [1, 2, 2, 3, 3, 3],
+      "expected_output": [1, 2, 3]
+    },
+    {
+      "id": 2,
+      "description": "Array with no duplicates",
+      "input": [1, 2, 3, 4, 5],
+      "expected_output": [1, 2, 3, 4, 5]
+    },
+    {
+      "id": 3,
+      "description": "Empty array",
+      "input": [],
+      "expected_output": []
+    },
+    {
+      "id": 4,
+      "description": "Single element",
+      "input": [42],
+      "expected_output": [42]
+    },
+    {
+      "id": 5,
+      "description": "All duplicates",
+      "input": [5, 5, 5, 5],
+      "expected_output": [5]
+    },
+    {
+      "id": 6,
+      "description": "String array with duplicates",
+      "input": ["apple", "banana", "apple", "cherry", "banana"],
+      "expected_output": ["apple", "banana", "cherry"]
+    }
+  ]
+}
