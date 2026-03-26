@@ -7,7 +7,7 @@ import "./terminal.css";
 
 export default function Terminal() {
   const containerRef = useRef(null);
-  const DevMode = true;
+  const DevMode = false;
 
   useEffect(() => {
     if (!containerRef.current) return;
