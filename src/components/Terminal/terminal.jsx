@@ -25,7 +25,7 @@ export default function Terminal() {
     fitAddon.fit();
     term.focus();
 
-    const ws = new WebSocket("ws://localhost:8000/ws/terminal");
+    const ws = new WebSocket("wss://api.stushellbackend.xyz/ws/terminal");
     ws.binaryType = "arraybuffer";
 
     ws.onopen = () => {
