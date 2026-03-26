@@ -1,10 +1,19 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import Sidebar from "./components/Sidebar/sidebar.jsx";
 import Terminal from "./components/Terminal/terminal.jsx";
 import Results from "./components/Results/results.jsx";
 import "./App.css";
 
 export default function App() {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get("lti_claims");
+    if (raw) {
+      const claims = JSON.parse(atob(raw));
+      console.log("From Moodle", claims);
+    }
+  }, []);
+
   return (
     <div className="shell">
       <Sidebar />

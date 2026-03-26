@@ -150,7 +150,10 @@ async def lti_launch(request: Request):
         issuer=PLATFORM_ISSUER,
     )
 
-    return RedirectResponse(FRONTEND_URL, status_code=302)
+    import json, base64
+    claims_b64 = base64.urlsafe_b64encode(json.dumps(claims).encode()).decode()
+
+    return RedirectResponse(f"{FRONTEND_URL}?lti_claims={claims_b64}", status_code=302)
 
 
 @app.websocket("/ws/terminal")
