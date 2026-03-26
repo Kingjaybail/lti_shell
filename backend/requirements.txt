@@ -1,3 +1,7 @@
 fastapi
 uvicorn
 websockets
+cryptography
+python-jose[cryptography]
+httpx
+python-multipart
