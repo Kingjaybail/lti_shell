@@ -11,7 +11,7 @@ export default function Sidebar() {
       </header>
 
       <div className="sidebarBody">
-        Given an array of length n, create a c program that will remove duplicate values from the given array. <br/><br/>
+        Given an array of length n, create a python program that will remove duplicate values from the given array. <br/><br/>
 
         Example array: <br/><br/>
         nums = [10, 99, 10, 12, 4]<br/><br/>
