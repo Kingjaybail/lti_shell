@@ -28,17 +28,16 @@ app.add_middleware(
 )
 
 # LTI 1.3 platform config
-PLATFORM_ISSUER = "https://ltishell.moodlecloud.com"
+PLATFORM_ISSUER = "https://wku.moodlecloud.com"
 CLIENT_ID = "hzlPu32GXpZybHo"
-AUTH_LOGIN_URL = "https://ltishell.moodlecloud.com/mod/lti/auth.php"
-PLATFORM_JWKS_URL = "https://ltishell.moodlecloud.com/mod/lti/certs.php"
+AUTH_LOGIN_URL = "https://wku.moodlecloud.com/mod/lti/auth.php"
+PLATFORM_JWKS_URL = "https://wku.moodlecloud.com/mod/lti/certs.php"
 TOOL_LAUNCH_URL = "https://api.stushellbackend.xyz/lti/launch"
 FRONTEND_URL = "https://stushell.vercel.app/"
 
 PRIVATE_KEY_FILE = "/app/lti_private.key"
 PUBLIC_KEY_FILE = "/app/lti_public.key"
 
-# In-memory nonce store (fine for single-instance)
 used_nonces = set()
 
 
