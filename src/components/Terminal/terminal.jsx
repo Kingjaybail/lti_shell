@@ -7,7 +7,6 @@ import "./terminal.css";
 
 export default function Terminal() {
   const containerRef = useRef(null);
-  const DevMode = false;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -25,11 +24,8 @@ export default function Terminal() {
     term.open(containerRef.current);
     fitAddon.fit();
     term.focus();
-    let wsUrl = "ws://localhost:8000";
-    
-    if (DevMode == false) {
-      wsUrl = import.meta.env.VITE_WS_URL;
-    } 
+
+    let wsUrl = import.meta.env.VITE_WS_URL;
 
     const ws = new WebSocket(`${wsUrl}/ws/terminal`);    
     ws.binaryType = "arraybuffer";

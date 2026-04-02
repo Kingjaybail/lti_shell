@@ -17,6 +17,8 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
 
+LOCAL = False
+
 app = FastAPI()
 
 app.add_middleware(
@@ -27,46 +29,47 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# LTI 1.3 platform config
-PLATFORM_ISSUER = "https://wku.moodlecloud.com"
-CLIENT_ID = "hzlPu32GXpZybHo"
-AUTH_LOGIN_URL = "https://wku.moodlecloud.com/mod/lti/auth.php"
-PLATFORM_JWKS_URL = "https://wku.moodlecloud.com/mod/lti/certs.php"
-TOOL_LAUNCH_URL = "https://api.stushellbackend.xyz/lti/launch"
-FRONTEND_URL = "https://stushell.vercel.app/"
+if not LOCAL:
+    # LTI 1.3 platform config
+    PLATFORM_ISSUER = "https://wku.moodlecloud.com"
+    CLIENT_ID = "hzlPu32GXpZybHo"
+    AUTH_LOGIN_URL = "https://wku.moodlecloud.com/mod/lti/auth.php"
+    PLATFORM_JWKS_URL = "https://wku.moodlecloud.com/mod/lti/certs.php"
+    TOOL_LAUNCH_URL = "https://api.stushellbackend.xyz/lti/launch"
+    FRONTEND_URL = "https://stushell.vercel.app/"
 
-PRIVATE_KEY_FILE = "/app/lti_private.key"
-PUBLIC_KEY_FILE = "/app/lti_public.key"
+    PRIVATE_KEY_FILE = "/app/lti_private.key"
+    PUBLIC_KEY_FILE = "/app/lti_public.key"
 
-used_nonces = set()
-
-
-def ensure_keys():
-    if not os.path.exists(PRIVATE_KEY_FILE):
-        private_key = rsa.generate_private_key(
-            public_exponent=65537, key_size=2048, backend=default_backend()
-        )
-        with open(PRIVATE_KEY_FILE, "wb") as f:
-            f.write(private_key.private_bytes(
-                serialization.Encoding.PEM,
-                serialization.PrivateFormat.TraditionalOpenSSL,
-                serialization.NoEncryption()
-            ))
-        with open(PUBLIC_KEY_FILE, "wb") as f:
-            f.write(private_key.public_key().public_bytes(
-                serialization.Encoding.PEM,
-                serialization.PublicFormat.SubjectPublicKeyInfo
-            ))
+    used_nonces = set()
 
 
-def get_private_key():
-    ensure_keys()
-    return open(PRIVATE_KEY_FILE).read()
+    def ensure_keys():
+        if not os.path.exists(PRIVATE_KEY_FILE):
+            private_key = rsa.generate_private_key(
+                public_exponent=65537, key_size=2048, backend=default_backend()
+            )
+            with open(PRIVATE_KEY_FILE, "wb") as f:
+                f.write(private_key.private_bytes(
+                    serialization.Encoding.PEM,
+                    serialization.PrivateFormat.TraditionalOpenSSL,
+                    serialization.NoEncryption()
+                ))
+            with open(PUBLIC_KEY_FILE, "wb") as f:
+                f.write(private_key.public_key().public_bytes(
+                    serialization.Encoding.PEM,
+                    serialization.PublicFormat.SubjectPublicKeyInfo
+                ))
 
 
-def get_public_key():
-    ensure_keys()
-    return open(PUBLIC_KEY_FILE).read()
+    def get_private_key():
+        ensure_keys()
+        return open(PRIVATE_KEY_FILE).read()
+
+
+    def get_public_key():
+        ensure_keys()
+        return open(PUBLIC_KEY_FILE).read()
 
 
 @app.get("/message")
