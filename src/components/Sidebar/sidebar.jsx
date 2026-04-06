@@ -1,8 +1,9 @@
-import "./sidebar.css";
-import "../../router/controller";
+import "./sidebar.css"
+import { useNavigate } from "react-router-dom"
 
-// here is where assignment will be populated
-export default function Sidebar() {
+export default function Sidebar({ isProfessor }) {
+  const navigate = useNavigate()
+
   return (
     <aside className="sidebarRoot">
       <header className="sidebarHeader">
@@ -11,16 +12,21 @@ export default function Sidebar() {
       </header>
 
       <div className="sidebarBody">
-        Given an array of length n, create a python program that will remove duplicate values from the given array. <br/><br/>
+        Given an array of length n, create a python program that will remove duplicate values from the given array. <br /><br />
 
-        Example array: <br/><br/>
-        nums = [10, 99, 10, 12, 4]<br/><br/>
+        Example array: <br /><br />
+        nums = [10, 99, 10, 12, 4]<br /><br />
 
         result = [10, 99, 12, 4]
       </div>
 
       <footer className="sidebarFooter">
+        {isProfessor && (
+          <button onClick={() => navigate("/professor")}>
+            Professor View
+          </button>
+        )}
       </footer>
     </aside>
-  );
+  )
 }

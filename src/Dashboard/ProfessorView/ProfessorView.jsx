@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./professorview.css";
 
 export default function ProfessorView() {
@@ -81,7 +82,6 @@ export default function ProfessorView() {
             + Create Assignment
           </button>
 
-          {/* ✅ New View as Student button */}
           <button
             className="viewStudentBtn"
             onClick={() => navigate("/")} // redirects to student view
