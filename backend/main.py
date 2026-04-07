@@ -76,6 +76,20 @@ if not LOCAL:
 def read_hello():
     return {"message": "hello world"}
 
+@app.get("/api/assignment/current")
+async def get_current_assignment():
+    return {
+        "title": "Remove Array Duplicates",
+        "course": "CS240",
+        "description": """Given an array of length n, create a python program that will remove duplicate values from the given array.
+
+Example array:
+
+nums = [10, 99, 10, 12, 4]
+
+result = [10, 99, 333, 4]"""
+    }
+
 
 @app.get("/lti/jwks")
 def lti_jwks():

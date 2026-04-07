@@ -6,10 +6,10 @@ import Results from "./components/Results/results.jsx"
 import ProfessorView from "./Dashboard/ProfessorView/ProfessorView.jsx"
 import "./App.css"
 
-function StudentShell({ isProfessor }) {
+function StudentShell({ isProfessor, assignment }) {
   return (
     <div className="shell">
-      <Sidebar isProfessor={isProfessor} />
+      <Sidebar isProfessor={isProfessor} assignment={assignment} />
       <div className="right">
         <div className="terminalPanel">
           <div className="panelHeader">
@@ -41,6 +41,7 @@ function ProfessorRoute({ isProfessor, children }) {
 
 export default function App() {
   const [claims, setClaims] = useState(null)
+  const [assignment, setAssignment] = useState(null)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -56,15 +57,53 @@ export default function App() {
       console.error("Failed to parse lti_claims", error)
     }
   }, [])
-  
-  const isProfessor = true
-/*  const isProfessor = useMemo(() => {
+useEffect(() => {
+  fetch("http://127.0.0.1:8000/api/assignment/current", {
+    method: "GET",
+    credentials: "include"
+  })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`Failed to load assignment: ${res.status}`)
+      }
+      return res.json()
+    })
+    .then(data => {
+      console.log("Assignment from backend:", data)
+      setAssignment(data)
+    })
+    .catch(error => {
+      console.error("Assignment fetch failed", error)
+    })
+}, [])
+
+  /*useEffect(() => {
+    fetch("/api/assignment/current", {
+      method: "GET",
+      credentials: "include"
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Failed to load assignment: ${res.status}`)
+        }
+        return res.json()
+      })
+      .then(data => {
+        console.log("Assignment from backend:", data)
+        setAssignment(data)
+      })
+      .catch(error => {
+        console.error("Assignment fetch failed", error)
+      })
+  }, [])*/
+    const isProfessor = true
+  /*const isProfessor = useMemo(() => {
     if (!claims) return false
 
     const roles =
-      claims[
-        "https://purl.imsglobal.org/spec/lti/claim/roles"
-      ] || claims.roles || []
+      claims["https://purl.imsglobal.org/spec/lti/claim/roles"] ||
+      claims.roles ||
+      []
 
     return roles.some(role =>
       role.includes("Instructor") ||
@@ -72,10 +111,19 @@ export default function App() {
       role.includes("Administrator")
     )
   }, [claims])*/
+  console.log("Current assignment state:", assignment)
 
   return (
     <Routes>
-      <Route path="/" element={<StudentShell isProfessor={isProfessor} />} />
+      <Route
+        path="/"
+        element={
+          <StudentShell
+            isProfessor={isProfessor}
+            assignment={assignment}
+          />
+        }
+      />
       <Route
         path="/professor"
         element={
