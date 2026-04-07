@@ -58,11 +58,10 @@ export default function App() {
     }
   }, [])
 
-  // remove hardcoded evil
-  let wsUrl = import.meta.env.VITE_WS_URL;
+  let apiUrl = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    fetch(`${wsUrl}/api/assignment/current`, {
+    fetch(`${apiUrl}/api/assignment/current`, {
       method: "GET",
       credentials: "include"
     })
