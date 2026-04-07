@@ -57,28 +57,11 @@ export default function App() {
       console.error("Failed to parse lti_claims", error)
     }
   }, [])
-useEffect(() => {
-  fetch("http://127.0.0.1:8000/api/assignment/current", {
-    method: "GET",
-    credentials: "include"
-  })
-    .then(res => {
-      if (!res.ok) {
-        throw new Error(`Failed to load assignment: ${res.status}`)
-      }
-      return res.json()
-    })
-    .then(data => {
-      console.log("Assignment from backend:", data)
-      setAssignment(data)
-    })
-    .catch(error => {
-      console.error("Assignment fetch failed", error)
-    })
-}, [])
 
-  /*useEffect(() => {
-    fetch("/api/assignment/current", {
+  let wsUrl = import.meta.env.VITE_WS_URL;
+
+  useEffect(() => {
+    fetch(`${wsUrl}/api/assignment/current`, {
       method: "GET",
       credentials: "include"
     })
@@ -95,22 +78,9 @@ useEffect(() => {
       .catch(error => {
         console.error("Assignment fetch failed", error)
       })
-  }, [])*/
-    const isProfessor = true
-  /*const isProfessor = useMemo(() => {
-    if (!claims) return false
+  }, [])
 
-    const roles =
-      claims["https://purl.imsglobal.org/spec/lti/claim/roles"] ||
-      claims.roles ||
-      []
-
-    return roles.some(role =>
-      role.includes("Instructor") ||
-      role.includes("Teacher") ||
-      role.includes("Administrator")
-    )
-  }, [claims])*/
+  const isProfessor = true
   console.log("Current assignment state:", assignment)
 
   return (
