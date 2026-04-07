@@ -83,11 +83,11 @@ async def get_current_assignment():
         "course": "CS240",
         "description": """Given an array of length n, create a python program that will remove duplicate values from the given array.
 
-Example array:
+        Example array:
 
-nums = [10, 99, 10, 12, 4]
+        nums = [10, 99, 10, 12, 4]
 
-result = [10, 99, 333, 4]"""
+        result = [10, 99, 333, 4]"""
     }
 
 

@@ -58,6 +58,7 @@ export default function App() {
     }
   }, [])
 
+  // remove hardcoded evil
   let wsUrl = import.meta.env.VITE_WS_URL;
 
   useEffect(() => {
