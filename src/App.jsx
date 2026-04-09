@@ -49,7 +49,8 @@ export default function App() {
     if (!raw) return
 
     try {
-      const parsed = JSON.parse(atob(raw))
+      const standard = raw.replace(/-/g, '+').replace(/_/g, '/')
+      const parsed = JSON.parse(atob(standard))
       setClaims(parsed)
       console.log("From Moodle", parsed)
     } catch (error) {
