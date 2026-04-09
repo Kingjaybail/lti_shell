@@ -52,7 +52,11 @@ export default function Terminal() {
     });
     resizeObserver.observe(containerRef.current);
 
+    const handlePageHide = () => ws.close();
+    window.addEventListener("pagehide", handlePageHide);
+
     return () => {
+      window.removeEventListener("pagehide", handlePageHide);
       resizeObserver.disconnect();
       ws.close();
       term.dispose();
