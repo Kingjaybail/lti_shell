@@ -1,93 +1,31 @@
-.profRoot{
-  padding:30px;
-  font-family:Arial, Helvetica, sans-serif;
+.profRoot {
+  padding: 30px;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #000;
+  min-height: 100vh;
+  color: #e5e7eb;
 }
 
-.profHeader{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:25px;
+.profHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
 }
 
-.createBtn{
-  background:#3b82f6;
-  color:white;
-  border:none;
-  padding:10px 16px;
-  border-radius:6px;
-  cursor:pointer;
+.profHeader h1 {
+  margin: 0;
+  color: #d1d5db;
 }
 
-.viewStudentBtn{
-  background:#facc15;
-  color:black;
-  border:none;
-  padding:10px 16px;
-  border-radius:6px;
-  cursor:pointer;
-  margin-left:10px;
-}
-
-.assignmentTable{
-  width:100%;
-  border-collapse:collapse;
-}
-
-.assignmentTable th,
-.assignmentTable td{
-  padding:12px;
-  border-bottom:1px solid #ddd;
-}
-
-.assignmentTable button{
-  margin-right:8px;
-  padding:6px 10px;
-  border:none;
-  border-radius:5px;
-  cursor:pointer;
-}
-
-.assignmentTable button:first-child{
-  background:#10b981;
-  color:white;
-}
-
-.assignmentTable button:last-child{
-  background:#ef4444;
-  color:white;
-}
-
-/* Modal */
-
-.formModal{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.5);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
-.assignmentForm{
-  background:rgba(255, 255, 255, 0.237);
-  padding:25px;
-  border-radius:8px;
-  width:350px;
-  display:flex;
-  flex-direction:column;
-}
-
-.assignmentForm input{
-  margin-bottom:12px;
-  padding:8px;
-}
-
-.formButtons{
-  display:flex;
-  justify-content:space-between;
+/* top buttons keep your old colors */
+.createBtn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 .viewStudentBtn {
@@ -95,7 +33,191 @@
   color: black;
   border: none;
   padding: 10px 16px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   margin-left: 10px;
+}
+
+/* table */
+.assignmentTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+  color: #dee0e3;
+}
+
+.assignmentTable th,
+.assignmentTable td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #374151;
+  text-align: left;
+}
+
+.assignmentTable th {
+  color: #8e97a7;
+  font-weight: 600;
+}
+
+.assignmentTable td {
+  color: #d1d5db;
+}
+
+.assignmentTable button {
+  margin-right: 8px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.assignmentTable button:first-child {
+  background: #10b981;
+  color: white;
+}
+
+.assignmentTable button:last-child {
+  background: #ef4444;
+  color: white;
+}
+
+.emptyRow {
+  text-align: center;
+  padding: 20px;
+  color: #9ca3af;
+}
+
+.formModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.assignmentForm {
+  background: #464444;
+  color: #111827;
+  padding: 25px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.assignmentForm h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #ffffff;
+}
+
+.assignmentForm label {
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #bcc2c8;
+}
+
+.assignmentForm input,
+.assignmentForm select {
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #111827;
+}
+
+.assignmentForm input::placeholder {
+  color: #6b7280;
+}
+
+.fileText {
+  margin-top: -4px;
+  margin-bottom: 14px;
+  color: #374151;
+}
+
+.questionCard {
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 15px;
+  background: #f9fafb;
+}
+
+.questionCard h4 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: black;
+}
+
+.questionCard label {
+  color: black;
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.questionCard input,
+.questionCard select,
+.questionCard textarea {
+  color: black;
+  width: 100%;
+  color: black;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 14px;
+  box-sizing: border-box;
+}
+
+.questionCard input::placeholder,
+.questionCard textarea::placeholder {
+  color: #6b7280;
+}
+
+.removeBtn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.emptyText {
+  color: #6b7280;
+  margin-bottom: 14px;
+}
+.formButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.saveBtn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.cancelBtn {
+  background: #9ca3af;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
 }

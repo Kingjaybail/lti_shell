@@ -77,7 +77,7 @@ useEffect(() => {
     })
 }, [])
 
-  /*useEffect(() => {
+/*  useEffect(() => {
     fetch("/api/assignment/current", {
       method: "GET",
       credentials: "include"
