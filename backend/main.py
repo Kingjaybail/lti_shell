@@ -1,80 +1,37 @@
-import asyncio
-import json
-import os
-import pty
-import struct
-import fcntl
-import termios
-import subprocess
-import uuid
-import httpx
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
-from jose import jwt, jwk
-from jose.utils import base64url_decode
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.backends import default_backend
 
-LOCAL = False
+from db import connect_db, close_db
+from routes import assignments, lti, terminal
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await connect_db()
+    yield
+    await close_db()
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-if not LOCAL:
-    # LTI 1.3 platform config
-    PLATFORM_ISSUER = "https://wku.moodlecloud.com"
-    CLIENT_ID = "hzlPu32GXpZybHo"
-    AUTH_LOGIN_URL = "https://wku.moodlecloud.com/mod/lti/auth.php"
-    PLATFORM_JWKS_URL = "https://wku.moodlecloud.com/mod/lti/certs.php"
-    TOOL_LAUNCH_URL = "https://api.stushellbackend.xyz/lti/launch"
-    FRONTEND_URL = "https://stushell.vercel.app/"
-
-    PRIVATE_KEY_FILE = "/app/lti_private.key"
-    PUBLIC_KEY_FILE = "/app/lti_public.key"
-
-    used_nonces = set()
-
-
-    def ensure_keys():
-        if not os.path.exists(PRIVATE_KEY_FILE):
-            private_key = rsa.generate_private_key(
-                public_exponent=65537, key_size=2048, backend=default_backend()
-            )
-            with open(PRIVATE_KEY_FILE, "wb") as f:
-                f.write(private_key.private_bytes(
-                    serialization.Encoding.PEM,
-                    serialization.PrivateFormat.TraditionalOpenSSL,
-                    serialization.NoEncryption()
-                ))
-            with open(PUBLIC_KEY_FILE, "wb") as f:
-                f.write(private_key.public_key().public_bytes(
-                    serialization.Encoding.PEM,
-                    serialization.PublicFormat.SubjectPublicKeyInfo
-                ))
-
-
-    def get_private_key():
-        ensure_keys()
-        return open(PRIVATE_KEY_FILE).read()
-
-
-    def get_public_key():
-        ensure_keys()
-        return open(PUBLIC_KEY_FILE).read()
+app.include_router(assignments.router)
+app.include_router(lti.router)
+app.include_router(terminal.router)
 
 
 @app.get("/message")
 def read_hello():
     return {"message": "hello world"}
+<<<<<<< Updated upstream
 
 @app.get("/api/assignment/current")
 async def get_current_assignment():
@@ -245,3 +202,5 @@ async def terminal_ws(websocket: WebSocket):
             os.close(parent_fd)
         except OSError:
             pass
+=======
+>>>>>>> Stashed changes

@@ -7,6 +7,10 @@ services:
       - "8000:8000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - .env
+    environment:
+      - LOCAL=false
     restart: unless-stopped
 
   sandbox:

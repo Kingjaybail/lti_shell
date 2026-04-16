@@ -5,3 +5,5 @@ cryptography
 python-jose[cryptography]
 httpx
 python-multipart
+motor
+python-dotenv
