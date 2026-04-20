@@ -1,33 +1,178 @@
-.sidebarRoot {
-  height: 100%;
+/* Assignments List Section */
+.assignmentsListSection {
+  flex: 1;
+  overflow-y: auto;
+  border-top: 1px solid #2d2d2d;
+  border-bottom: 1px solid #2d2d2d;
+}
+
+.assignmentsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.assignmentContainer {
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
-.sidebarHeader {
-  padding: 12px;
-  border-bottom: 1px solid var(--border);
+.assignmentItem {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-left: 3px solid transparent;
+  position: relative;
+  z-index: 1;
 }
 
-.sidebarTitle {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
+.assignmentItem:hover {
+  background: #2d2d2d;
 }
 
-.sidebarSub {
-  margin-top: 4px;
-  font-size: 12px;
-  opacity: 0.7;
+.assignmentItem.active {
+  background: #007acc20;
+  border-left-color: #007acc;
 }
 
-.sidebarBody {
+.assignmentId {
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+  min-width: 28px;
+}
+
+.assignmentTitle {
+  color: #d4d4d4;
+  font-size: 13px;
   flex: 1;
-  padding: 12px;
-  overflow: auto;
+  transition: color 0.2s;
 }
 
-.sidebarFooter {
-  padding: 12px;
-  border-top: 1px solid var(--border);
+.assignmentItem.active .assignmentTitle {
+  color: #fff;
+  font-weight: 500;
+}
+
+.dropdownArrow {
+  color: #007acc;
+  font-size: 10px;
+  animation: fadeIn 0.2s ease-in;
+}
+
+.activeIndicator {
+  color: #00b8a3;
+  font-size: 12px;
+  font-weight: bold;
+  animation: pulse 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0% { opacity: 0; transform: scale(0); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Inline Assignment Description - with smooth expand/collapse animation */
+.assignmentDescriptionInline {
+  padding: 0 16px 12px 44px;
+  background: #1a1a1a;
+  border-left: 3px solid #007acc;
+  margin: 0;
+  animation: expandDown 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes expandDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 200px;
+    padding-bottom: 12px;
+    transform: translateY(0);
+  }
+}
+
+/* Collapse animation for closing */
+.assignmentDescriptionInline.collapsing {
+  animation: collapseUp 0.3s ease-out forwards;
+}
+
+@keyframes collapseUp {
+  from {
+    opacity: 1;
+    max-height: 200px;
+    padding-bottom: 12px;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.assignmentDescriptionInline p {
+  color: #d4d4d4;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Separator line between assignments */
+.separatorLine {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #2d2d2d 10%,
+    #2d2d2d 90%,
+    transparent 100%
+  );
+  margin: 0 16px;
+}
+
+/* Custom scrollbar for assignments list */
+.assignmentsListSection::-webkit-scrollbar {
+  width: 6px;
+}
+
+.assignmentsListSection::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.assignmentsListSection::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 3px;
+}
+
+.assignmentsListSection::-webkit-scrollbar-thumb:hover {
+  background: #666;
 }

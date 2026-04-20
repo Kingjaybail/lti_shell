@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react"
 import { Routes, Route, Navigate } from "react-router-dom"
 import Sidebar from "./components/Sidebar/sidebar.jsx"
 import Terminal from "./components/Terminal/terminal.jsx"
@@ -6,10 +5,13 @@ import Results from "./components/Results/results.jsx"
 import ProfessorView from "./Dashboard/ProfessorView/ProfessorView.jsx"
 import "./App.css"
 
+
+
 function StudentShell({ isProfessor, claims }) {
   return (
     <div className="shell">
       <Sidebar isProfessor={isProfessor} claims={claims} />
+
       <div className="right">
         <div className="terminalPanel">
           <div className="panelHeader">
@@ -40,24 +42,24 @@ function ProfessorRoute({ isProfessor, children }) {
 }
 
 export default function App() {
-  const [claims, setClaims] = useState(null)
+  // ✅ Derive claims directly (no useEffect, no setState warning)
+  let claims = null
 
-  useEffect(() => {
+  try {
     const params = new URLSearchParams(window.location.search)
     const raw = params.get("lti_claims")
 
-    if (!raw) return
-
-    try {
-      const standard = raw.replace(/-/g, '+').replace(/_/g, '/')
-      const parsed = JSON.parse(atob(standard))
-      setClaims(parsed)
-      console.log("From Moodle", parsed)
-    } catch (error) {
-      console.error("Failed to parse lti_claims", error)
+    if (raw) {
+      const standard = raw.replace(/-/g, "+").replace(/_/g, "/")
+      const decoded = atob(standard)
+      claims = JSON.parse(decoded)
+      console.log("From Moodle:", claims)
     }
-  }, [])
+  } catch (error) {
+    console.error("Failed to parse lti_claims", error)
+  }
 
+  // ⚠️ You can improve this later using claims (role detection)
   const isProfessor = true
 
   return (
@@ -71,6 +73,7 @@ export default function App() {
           />
         }
       />
+
       <Route
         path="/professor"
         element={
