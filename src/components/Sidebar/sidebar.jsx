@@ -1,26 +1,8 @@
 import "./sidebar.css"
 import { useNavigate } from "react-router-dom"
-import { useState } from "react"
 
 export default function Sidebar({ isProfessor, claims, assignment, activeQuestion, onSelectQuestion }) {
   const navigate = useNavigate()
-  const [openAssignmentId, setOpenAssignmentId] = useState(assignments[0].id) // First one open by default
-  const [hoveredAssignmentId, setHoveredAssignmentId] = useState(null)
-
-  const handleAssignmentClick = (assignment) => {
-    // Toggle: if already open, close it; if closed, open it
-    if (openAssignmentId === assignment.id) {
-      setOpenAssignmentId(null) // Close
-      if (onAssignmentChange) {
-        onAssignmentChange(null) // Notify that no assignment is selected
-      }
-    } else {
-      setOpenAssignmentId(assignment.id) // Open new one
-      if (onAssignmentChange) {
-        onAssignmentChange(assignment)
-      }
-    }
-  }
 
   const resourceLink = claims?.["https://purl.imsglobal.org/spec/lti/claim/resource_link"]
   const context = claims?.["https://purl.imsglobal.org/spec/lti/claim/context"]
@@ -46,7 +28,7 @@ export default function Sidebar({ isProfessor, claims, assignment, activeQuestio
           <p className="sectionLabel">Question</p>
           <select
             className="questionDropdown"
-            value={activeQuestion}
+            value={activeQuestion ?? ""}
             onChange={e => onSelectQuestion(Number(e.target.value))}
             disabled={questions.length === 0}
           >
@@ -67,6 +49,9 @@ export default function Sidebar({ isProfessor, claims, assignment, activeQuestio
           <>
             <p className="sectionLabel">Assignment Info</p>
             <p className="questionPromptFull">{selected.prompt}</p>
+            <p className="testCaseCount">
+              {selected.test_cases.length} test case{selected.test_cases.length !== 1 ? "s" : ""}
+            </p>
           </>
         )}
         {!selected && <p className="emptyState">No assignment selected.</p>}

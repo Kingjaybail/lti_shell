@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom"
+import { useState, useEffect } from "react"
 import Sidebar from "./components/Sidebar/sidebar.jsx"
 import Terminal from "./components/Terminal/terminal.jsx"
 import Results from "./components/Results/results.jsx"
