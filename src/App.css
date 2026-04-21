@@ -101,6 +101,17 @@ body, html {
   padding-bottom: 2px;
 }
 
+.gradeChip {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 1px 10px;
+  letter-spacing: 0.03em;
+}
+
 .terminalHost {
   flex: 1;
   overflow: hidden;

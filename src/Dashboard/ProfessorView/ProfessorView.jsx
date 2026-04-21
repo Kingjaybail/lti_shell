@@ -2,149 +2,210 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./professorview.css";
 
-export default function ProfessorView() {
+const emptyTestCase = () => ({ input: "", expected_output: "", stdin: "" });
+const emptyQuestion = () => ({ id: crypto.randomUUID(), prompt: "", test_cases: [emptyTestCase()] });
 
+export default function ProfessorView({ assignment, claims, apiUrl, onAssignmentUpdate }) {
   const navigate = useNavigate();
 
-  const [assignments, setAssignments] = useState([
-    { id: 1, title: "Remove Array Duplicates", course: "CS240", students: 40 },
-    { id: 2, title: "Linux Pipes Practice", course: "CS240", students: 38 }
-  ]);
+  const [questions, setQuestions] = useState(assignment?.questions ?? []);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [formData, setFormData] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
+  const resourceLink = claims?.["https://purl.imsglobal.org/spec/lti/claim/resource_link"];
+  const context = claims?.["https://purl.imsglobal.org/spec/lti/claim/context"];
+  const assignmentId = assignment?.moodle_resource_id;
+  const courseId = assignment?.moodle_course_id;
 
-  const [formData, setFormData] = useState({
-    title: "",
-    course: ""
-  });
+  function openCreate() {
+    setFormData(emptyQuestion());
+    setEditingIndex(null);
+  }
 
-  function handleChange(e){
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
+  function openEdit(i) {
+    setFormData(JSON.parse(JSON.stringify(questions[i])));
+    setEditingIndex(i);
+  }
+
+  function closeForm() {
+    setFormData(null);
+    setEditingIndex(null);
+  }
+
+  function handlePromptChange(e) {
+    setFormData(f => ({ ...f, prompt: e.target.value }));
+  }
+
+  function handleTestCaseChange(tcIndex, field, value) {
+    setFormData(f => {
+      const tcs = [...f.test_cases];
+      tcs[tcIndex] = { ...tcs[tcIndex], [field]: value };
+      return { ...f, test_cases: tcs };
     });
   }
 
-  function handleCreate(){
-    setEditingId(null);
-    setFormData({title:"",course:""});
-    setShowForm(true);
+  function addTestCase() {
+    setFormData(f => ({ ...f, test_cases: [...f.test_cases, emptyTestCase()] }));
   }
 
-  function handleEdit(assignment){
-    setEditingId(assignment.id);
-    setFormData({
-      title: assignment.title,
-      course: assignment.course
-    });
-    setShowForm(true);
+  function removeTestCase(tcIndex) {
+    setFormData(f => ({
+      ...f,
+      test_cases: f.test_cases.filter((_, i) => i !== tcIndex),
+    }));
   }
 
-  function handleDelete(id){
-    const filtered = assignments.filter(a => a.id !== id);
-    setAssignments(filtered);
-  }
-
-  function handleSubmit(e){
+  function handleFormSubmit(e) {
     e.preventDefault();
-
-    if(editingId){
-      const updated = assignments.map(a =>
-        a.id === editingId
-        ? {...a, title: formData.title, course: formData.course}
-        : a
-      );
-      setAssignments(updated);
-
+    const cleaned = {
+      ...formData,
+      test_cases: formData.test_cases.map(tc => ({
+        input: tc.input,
+        expected_output: tc.expected_output,
+        stdin: tc.stdin || null,
+      })),
+    };
+    if (editingIndex !== null) {
+      setQuestions(qs => qs.map((q, i) => i === editingIndex ? cleaned : q));
     } else {
-      const newAssignment = {
-        id: Date.now(),
-        title: formData.title,
-        course: formData.course,
-        students: 0
-      };
-      setAssignments([...assignments, newAssignment]);
+      setQuestions(qs => [...qs, cleaned]);
     }
-
-    setShowForm(false);
+    closeForm();
   }
 
-  return(
+  function deleteQuestion(i) {
+    setQuestions(qs => qs.filter((_, idx) => idx !== i));
+  }
+
+  async function saveToMongo() {
+    if (!assignmentId || !courseId) {
+      setSaveError("No Moodle assignment loaded — cannot save.");
+      return;
+    }
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const res = await fetch(`${apiUrl}/api/assignment/questions`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assignment_id: assignmentId,
+          course_id: courseId,
+          questions,
+        }),
+      });
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      onAssignmentUpdate?.({ ...assignment, questions });
+    } catch (err) {
+      setSaveError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
     <div className="profRoot">
-
       <header className="profHeader">
-        <h1>Assignment Manager</h1>
-
         <div>
-          {/* Existing Create Assignment button */}
-          <button className="createBtn" onClick={handleCreate}>
-            + Create Assignment
+          <h1>{assignment?.title ?? resourceLink?.title ?? "Assignment"}</h1>
+          <p style={{ margin: 0, opacity: 0.6, fontSize: 13 }}>
+            {assignment?.class_name ?? context?.label ?? "Course"} &mdash; manage questions below
+          </p>
+        </div>
+        <div className="headerActions">
+          <button className="btn btn-primary" onClick={openCreate}>+ Add Question</button>
+          <button className="btn btn-success" onClick={saveToMongo} disabled={saving}>
+            {saving ? "Saving…" : "Save Questions"}
           </button>
-
-          {/* ✅ New View as Student button */}
-          <button
-            className="viewStudentBtn"
-            onClick={() => navigate("/")} // redirects to student view
-          >
-            View as Student
-          </button>
+          <button className="btn btn-warning" onClick={() => navigate("/")}>View as Student</button>
         </div>
       </header>
 
-      {showForm && (
-        <div className="formModal">
-          <form className="assignmentForm" onSubmit={handleSubmit}>
-            <h2>{editingId ? "Edit Assignment" : "Create Assignment"}</h2>
+      {saveError && <p className="saveError">{saveError}</p>}
 
-            <label>Title</label>
-            <input
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-            />
-
-            <label>Course</label>
-            <input
-              name="course"
-              value={formData.course}
-              onChange={handleChange}
-              required
-            />
-
-            <div className="formButtons">
-              <button type="submit">Save</button>
-              <button type="button" onClick={()=>setShowForm(false)}>Cancel</button>
-            </div>
-          </form>
-        </div>
-      )}
-
+      {/* Question list */}
       <table className="assignmentTable">
         <thead>
           <tr>
-            <th>Assignment</th>
-            <th>Course</th>
-            <th>Students</th>
+            <th>#</th>
+            <th>Question</th>
+            <th>Test Cases</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {assignments.map((a)=>(
-            <tr key={a.id}>
-              <td>{a.title}</td>
-              <td>{a.course}</td>
-              <td>{a.students}</td>
+          {questions.length === 0 && (
+            <tr><td colSpan={4} style={{ opacity: 0.5, textAlign: "center" }}>No questions yet.</td></tr>
+          )}
+          {questions.map((q, i) => (
+            <tr key={q.id ?? i}>
+              <td>{i + 1}</td>
+              <td>{q.prompt.length > 80 ? q.prompt.slice(0, 80) + "…" : q.prompt}</td>
+              <td>{q.test_cases.length}</td>
               <td>
-                <button onClick={()=>handleEdit(a)}>Edit</button>
-                <button onClick={()=>handleDelete(a.id)}>Delete</button>
+                <div className="tableActions">
+                  <button className="btn btn-success" onClick={() => openEdit(i)}>Edit</button>
+                  <button className="btn btn-danger" onClick={() => deleteQuestion(i)}>Delete</button>
+                </div>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
+      {/* Question form modal */}
+      {formData && (
+        <div className="formModal">
+          <form className="assignmentForm questionForm" onSubmit={handleFormSubmit}>
+            <h2>{editingIndex !== null ? "Edit Question" : "New Question"}</h2>
+
+            <label>Prompt</label>
+            <textarea
+              rows={3}
+              value={formData.prompt}
+              onChange={handlePromptChange}
+              required
+            />
+
+            <label style={{ marginTop: 12 }}>Test Cases</label>
+            {formData.test_cases.map((tc, tcIdx) => (
+              <div key={tcIdx} className="testCaseRow">
+                <span className="tcLabel">#{tcIdx + 1}</span>
+                <div className="tcFields">
+                  <input
+                    placeholder="Command (e.g. python3 hello.py)"
+                    value={tc.input}
+                    onChange={e => handleTestCaseChange(tcIdx, "input", e.target.value)}
+                    required
+                  />
+                  <input
+                    placeholder="Expected output"
+                    value={tc.expected_output}
+                    onChange={e => handleTestCaseChange(tcIdx, "expected_output", e.target.value)}
+                    required
+                  />
+                  <input
+                    placeholder=""
+                    value={tc.stdin ?? ""}
+                    onChange={e => handleTestCaseChange(tcIdx, "stdin", e.target.value)}
+                  />
+                </div>
+                {formData.test_cases.length > 1 && (
+                  <button type="button" className="btn btn-danger" style={{ padding: "4px 8px", marginTop: 8, fontSize: 11 }} onClick={() => removeTestCase(tcIdx)}>✕</button>
+                )}
+              </div>
+            ))}
+            <button type="button" className="btn btn-ghost" onClick={addTestCase}>+ Add Test Case</button>
+
+            <div className="formButtons">
+              <button type="button" className="btn btn-danger" onClick={closeForm}>Cancel</button>
+              <button type="submit" className="btn btn-primary">Save Question</button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

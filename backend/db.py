@@ -13,7 +13,7 @@ db = None
 async def connect_db():
     global client, db
     client = AsyncIOMotorClient(MONGO_URI)
-    db = client["lti_shell"]
+    db = client["LTI_Shell"]
 
 
 async def close_db():

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "./results.css";
 
-export default function Results({ question, sessionId }) {
+export default function Results({ question, questionIndex, sessionId, onQuestionResult }) {
   const [results, setResults] = useState([]);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState(null);
@@ -34,13 +34,17 @@ export default function Results({ question, sessionId }) {
       if (!res.ok) throw new Error(`Server returned ${res.status}`);
 
       const data = await res.json();
-      setResults(data.results.map((r, i) => ({
+      const mapped = data.results.map((r, i) => ({
         id: i,
         name: `Test Case ${i + 1}`,
         passed: r.passed,
         actual: r.actual,
         expected: r.expected,
-      })));
+      }));
+
+      setResults(mapped);
+      const allPassed = mapped.length === testCases.length && mapped.every(r => r.passed);
+      onQuestionResult?.(questionIndex, allPassed);
     } catch (err) {
       setError(err.message);
     } finally {
