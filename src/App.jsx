@@ -5,19 +5,28 @@ import Results from "./components/Results/results.jsx"
 import ProfessorView from "./Dashboard/ProfessorView/ProfessorView.jsx"
 import "./App.css"
 
+function StudentShell({ isProfessor, claims, assignment }) {
+  const [activeQuestion, setActiveQuestion] = useState(0)
+  const [sessionId, setSessionId] = useState(null)
 
+  const questions = assignment?.questions ?? []
+  const currentQuestion = questions[activeQuestion] ?? null
 
-function StudentShell({ isProfessor, claims }) {
   return (
     <div className="shell">
-      <Sidebar isProfessor={isProfessor} claims={claims} />
-
+      <Sidebar
+        isProfessor={isProfessor}
+        claims={claims}
+        assignment={assignment}
+        activeQuestion={activeQuestion}
+        onSelectQuestion={setActiveQuestion}
+      />
       <div className="right">
         <div className="terminalPanel">
           <div className="panelHeader">
             <span className="active">Terminal</span>
           </div>
-          <Terminal />
+          <Terminal onSession={setSessionId} />
         </div>
 
         <div className="resultsPanel">
@@ -25,7 +34,7 @@ function StudentShell({ isProfessor, claims }) {
             <span className="active">Results</span>
           </div>
           <div className="resultsBody">
-            <Results />
+            <Results question={currentQuestion} sessionId={sessionId} />
           </div>
         </div>
       </div>
@@ -42,8 +51,8 @@ function ProfessorRoute({ isProfessor, children }) {
 }
 
 export default function App() {
-  // ✅ Derive claims directly (no useEffect, no setState warning)
-  let claims = null
+  const [claims, setClaims] = useState(null)
+  const [assignment, setAssignment] = useState(null)
 
   try {
     const params = new URLSearchParams(window.location.search)
@@ -59,7 +68,14 @@ export default function App() {
     console.error("Failed to parse lti_claims", error)
   }
 
-  // ⚠️ You can improve this later using claims (role detection)
+  useEffect(() => {
+    const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000"
+    fetch(`${apiUrl}/api/assignment/dummy`)
+      .then(r => r.json())
+      .then(data => setAssignment(data))
+      .catch(err => console.error("Failed to load assignment", err))
+  }, [])
+
   const isProfessor = true
 
   return (
@@ -70,6 +86,7 @@ export default function App() {
           <StudentShell
             isProfessor={isProfessor}
             claims={claims}
+            assignment={assignment}
           />
         }
       />
