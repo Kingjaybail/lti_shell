@@ -82,6 +82,7 @@ export default function ProfessorView() {
             + Create Assignment
           </button>
 
+          {/* ✅ New View as Student button */}
           <button
             className="viewStudentBtn"
             onClick={() => navigate("/")} // redirects to student view

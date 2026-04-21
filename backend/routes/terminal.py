@@ -1,8 +1,10 @@
 import asyncio
+import json
 import os
 import subprocess
 import threading
 import struct
+import uuid
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from dotenv import load_dotenv
 
@@ -21,16 +23,18 @@ router = APIRouter(tags=["terminal"])
 @router.websocket("/ws/terminal")
 async def terminal_ws(websocket: WebSocket):
     await websocket.accept()
+    session_id = uuid.uuid4().hex[:8]
+    await websocket.send_text(json.dumps({"type": "session", "id": session_id}))
 
     if LOCAL:
-        await _local_docker_terminal(websocket)
+        await _local_docker_terminal(websocket, session_id)
     else:
-        await _pty_docker_terminal(websocket)
+        await _pty_docker_terminal(websocket, session_id)
 
 
-async def _local_docker_terminal(websocket: WebSocket):
+async def _local_docker_terminal(websocket: WebSocket, session_id: str):
     """Docker terminal for local Windows — pipes instead of PTY."""
-    container_name = f"lti-shell-{id(websocket)}"
+    container_name = f"lti-shell-{session_id}"
 
     proc = subprocess.Popen(
         [
@@ -93,10 +97,10 @@ async def _local_docker_terminal(websocket: WebSocket):
         subprocess.run(["docker", "rm", "-f", container_name], capture_output=True)
 
 
-async def _pty_docker_terminal(websocket: WebSocket):
+async def _pty_docker_terminal(websocket: WebSocket, session_id: str):
     """Full PTY-backed Docker terminal for Linux/production."""
     parent_fd, child_fd = pty.openpty()
-    container_name = f"lti-shell-{id(websocket)}"
+    container_name = f"lti-shell-{session_id}"
 
     proc = subprocess.Popen(
         [

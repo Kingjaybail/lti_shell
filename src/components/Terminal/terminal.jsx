@@ -1,11 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Terminal as XTerm } from "@xterm/xterm";
-import { AttachAddon } from "@xterm/addon-attach";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
 import "./terminal.css";
 
-export default function Terminal() {
+export default function Terminal({ onSession }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -25,30 +24,45 @@ export default function Terminal() {
     fitAddon.fit();
     term.focus();
 
-    let wsUrl = import.meta.env.VITE_WS_URL;
-
-    const ws = new WebSocket(`${wsUrl}/ws/terminal`);    
+    const wsUrl = import.meta.env.VITE_WS_URL;
+    const ws = new WebSocket(`${wsUrl}/ws/terminal`);
     ws.binaryType = "arraybuffer";
 
-    ws.onopen = () => {
-      const attachAddon = new AttachAddon(ws);
-      term.loadAddon(attachAddon);
-
-      sendResize(ws, term.cols, term.rows);
-    };
-
-    const sendResize = (socket, cols, rows) => {
-      if (socket.readyState !== WebSocket.OPEN) return;
+    const sendResize = (cols, rows) => {
+      if (ws.readyState !== WebSocket.OPEN) return;
       const buf = new Uint8Array(5);
       buf[0] = 0x01;
       new DataView(buf.buffer).setUint16(1, cols, false);
       new DataView(buf.buffer).setUint16(3, rows, false);
-      socket.send(buf);
+      ws.send(buf);
     };
+
+    ws.onopen = () => {
+      sendResize(term.cols, term.rows);
+    };
+
+    ws.onmessage = (event) => {
+      if (typeof event.data === "string") {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === "session") {
+            onSession?.(msg.id);
+            return;
+          }
+        } catch {}
+        term.write(event.data);
+        return;
+      }
+      term.write(new Uint8Array(event.data));
+    };
+
+    term.onData(data => {
+      if (ws.readyState === WebSocket.OPEN) ws.send(data);
+    });
 
     const resizeObserver = new ResizeObserver(() => {
       fitAddon.fit();
-      sendResize(ws, term.cols, term.rows);
+      sendResize(term.cols, term.rows);
     });
     resizeObserver.observe(containerRef.current);
 
