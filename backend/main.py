@@ -31,7 +31,6 @@ app.include_router(terminal.router)
 @app.get("/message")
 def read_hello():
     return {"message": "hello world"}
-<<<<<<< Updated upstream
 
 @app.get("/api/assignment/current")
 async def get_current_assignment():
@@ -202,5 +201,3 @@ async def terminal_ws(websocket: WebSocket):
             os.close(parent_fd)
         except OSError:
             pass
-=======
->>>>>>> Stashed changes
