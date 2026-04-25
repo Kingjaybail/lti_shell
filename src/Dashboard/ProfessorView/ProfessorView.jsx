@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import "./professorview.css";
 
 const emptyTestCase = () => ({ input: "", expected_output: "", stdin: "" });
 const emptyQuestion = () => ({ id: crypto.randomUUID(), prompt: "", test_cases: [emptyTestCase()] });
 
-export default function ProfessorView({ assignment, claims, apiUrl, onAssignmentUpdate }) {
-  const navigate = useNavigate();
+export default function ProfessorView({ assignment, claims, apiUrl, onAssignmentUpdate, onClose }) {
 
   const [questions, setQuestions] = useState(assignment?.questions ?? []);
   const [editingIndex, setEditingIndex] = useState(null);
@@ -119,7 +117,7 @@ export default function ProfessorView({ assignment, claims, apiUrl, onAssignment
           <button className="btn btn-success" onClick={saveToMongo} disabled={saving}>
             {saving ? "Saving…" : "Save Questions"}
           </button>
-          <button className="btn btn-warning" onClick={() => navigate("/")}>View as Student</button>
+          <button className="btn btn-warning" onClick={onClose}>View as Student</button>
         </div>
       </header>
 

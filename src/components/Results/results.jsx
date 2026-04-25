@@ -28,7 +28,7 @@ export default function Results({ question, questionIndex, sessionId, onQuestion
       const res = await fetch(`${apiUrl}/api/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ session_id: sessionId, test_cases: testCases }),
+        body: JSON.stringify({ session_id: sessionId, question_index: questionIndex, test_cases: testCases }),
       });
 
       if (!res.ok) throw new Error(`Server returned ${res.status}`);
@@ -63,7 +63,7 @@ export default function Results({ question, questionIndex, sessionId, onQuestion
           onClick={runTests}
           disabled={running || testCases.length === 0}
         >
-          {running ? "Running..." : "Submit"}
+          {running ? "Running..." : "Run"}
         </button>
       </header>
 
@@ -72,7 +72,7 @@ export default function Results({ question, questionIndex, sessionId, onQuestion
 
         {!error && results.length === 0 && !running && (
           <p className="placeholder">
-            {testCases.length === 0 ? "Select an assignment to begin." : "Press Submit to run test cases."}
+            {testCases.length === 0 ? "Select an assignment to begin." : "Press Run to run test cases."}
           </p>
         )}
 

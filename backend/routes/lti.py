@@ -10,7 +10,7 @@ from cryptography.hazmat.backends import default_backend
 from jose import jwt
 
 PLATFORM_ISSUER = "https://wku.moodlecloud.com"
-CLIENT_ID = "hzlPu32GXpZybHo"
+CLIENT_ID = "6MHXhJtCVMVV4gp"
 AUTH_LOGIN_URL = "https://wku.moodlecloud.com/mod/lti/auth.php"
 PLATFORM_JWKS_URL = "https://wku.moodlecloud.com/mod/lti/certs.php"
 TOOL_LAUNCH_URL = "https://api.stushellbackend.xyz/lti/launch"

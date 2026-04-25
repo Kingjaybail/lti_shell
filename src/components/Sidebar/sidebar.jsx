@@ -1,9 +1,57 @@
+import { useState, useEffect, useRef } from "react"
 import "./sidebar.css"
-import { useNavigate } from "react-router-dom"
 
-export default function Sidebar({ isProfessor, claims, assignment, activeQuestion, onSelectQuestion }) {
-  const navigate = useNavigate()
+function QuestionDropdown({ questions, activeQuestion, onSelectQuestion, questionResults }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
 
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener("mousedown", handleClick)
+    return () => document.removeEventListener("mousedown", handleClick)
+  }, [])
+
+  const selected = questions[activeQuestion]
+  const selectedPassed = questionResults?.[activeQuestion] === true
+  const label = selected
+    ? `#${activeQuestion + 1} — ${selected.prompt.length > 15 ? selected.prompt.slice(0, 15) + "…" : selected.prompt}`
+    : "No assignments loaded"
+
+  return (
+    <div className="customSelect" ref={ref}>
+      <div
+        className={`customSelectTrigger${open ? " open" : ""}${selectedPassed ? " passed" : ""}`}
+        onClick={() => questions.length > 0 && setOpen(o => !o)}
+      >
+        <span>{label}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </div>
+      {open && (
+        <ul className="customSelectList">
+          {questions.map((q, i) => {
+            const passed = questionResults?.[i] === true
+            return (
+              <li
+                key={q.id ?? i}
+                className={`customSelectItem${i === activeQuestion ? " active" : ""}${passed ? " passed" : ""}`}
+                onClick={() => { onSelectQuestion(i); setOpen(false) }}
+              >
+                <span>#{i + 1} — {q.prompt.length > 20 ? q.prompt.slice(0, 20) + "…" : q.prompt}</span>
+                {passed && <span className="qCheck">✓</span>}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+export default function Sidebar({ isProfessor, claims, assignment, activeQuestion, onSelectQuestion, questionResults, onOpenProfessor }) {
   const resourceLink = claims?.["https://purl.imsglobal.org/spec/lti/claim/resource_link"]
   const context = claims?.["https://purl.imsglobal.org/spec/lti/claim/context"]
 
@@ -26,21 +74,12 @@ export default function Sidebar({ isProfessor, claims, assignment, activeQuestio
 
         <div className="dropdownSection">
           <p className="sectionLabel">Question</p>
-          <select
-            className="questionDropdown"
-            value={activeQuestion ?? ""}
-            onChange={e => onSelectQuestion(Number(e.target.value))}
-            disabled={questions.length === 0}
-          >
-            {questions.length === 0
-              ? <option>No assignments loaded</option>
-              : questions.map((q, i) => (
-                  <option key={q.id} value={i}>
-                    #{i + 1} — {q.prompt.length > 15 ? q.prompt.slice(0, 15) + "…" : q.prompt}
-                  </option>
-                ))
-            }
-          </select>
+          <QuestionDropdown
+            questions={questions}
+            activeQuestion={activeQuestion}
+            onSelectQuestion={onSelectQuestion}
+            questionResults={questionResults}
+          />
         </div>
       </header>
 
@@ -59,7 +98,7 @@ export default function Sidebar({ isProfessor, claims, assignment, activeQuestio
 
       <footer className="sidebarFooter">
         {isProfessor && (
-          <button onClick={() => navigate("/professor")}>Professor View</button>
+          <button onClick={onOpenProfessor}>Professor View</button>
         )}
       </footer>
     </aside>

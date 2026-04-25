@@ -10,8 +10,13 @@ from models.assignment import Assignment, Question, TestCase
 from models.course import Course
 
 
+class SetupSessionRequest(BaseModel):
+    session_id: str
+    question_count: int
+
 class SubmitRequest(BaseModel):
     session_id: str
+    question_index: int = 0
     test_cases: List[TestCase]
 
 
@@ -36,6 +41,17 @@ async def get_dev_assignment():
     return JSONResponse(doc)
 
 
+@router.post("/session/setup")
+async def setup_session(body: SetupSessionRequest):
+    container_name = f"lti-shell-{body.session_id}"
+    dirs = " ".join(f"/workspace/q{i}" for i in range(1, body.question_count + 1))
+    subprocess.run(
+        ["docker", "exec", container_name, "bash", "-c", f"mkdir -p {dirs}"],
+        capture_output=True, timeout=5,
+    )
+    return {"ok": True}
+
+
 @router.post("/submit")
 async def submit_tests(body: SubmitRequest):
     container_name = f"lti-shell-{body.session_id}"
@@ -43,10 +59,12 @@ async def submit_tests(body: SubmitRequest):
 
     for i, tc in enumerate(body.test_cases):
         try:
-            cmd = ["docker", "exec"]
+            cmd = ["docker", "exec", "-u", "user"]
             if tc.stdin is not None:
                 cmd.append("-i")
-            cmd += [container_name, "bash", "-c", tc.input]
+            workdir = f"/workspace/q{body.question_index + 1}"
+            cmd += [container_name, "bash", "-c", f"mkdir -p {workdir} && cd {workdir} && {tc.input}"]
+            print(f"[submit] cmd: {' '.join(cmd)}")
 
             proc = subprocess.run(
                 cmd,

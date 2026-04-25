@@ -94,7 +94,8 @@ async def _local_docker_terminal(websocket: WebSocket, session_id: str):
     finally:
         connected = False
         proc.terminate()
-        subprocess.run(["docker", "rm", "-f", container_name], capture_output=True)
+        result = subprocess.run(["docker", "rm", "-f", container_name], capture_output=True, text=True)
+        print(f"[cleanup] {container_name} — rc={result.returncode} {result.stderr.strip()}", flush=True)
 
 
 async def _pty_docker_terminal(websocket: WebSocket, session_id: str):
@@ -160,7 +161,8 @@ async def _pty_docker_terminal(websocket: WebSocket, session_id: str):
     finally:
         connected = False
         proc.terminate()
-        subprocess.run(["docker", "rm", "-f", container_name], capture_output=True)
+        result = subprocess.run(["docker", "rm", "-f", container_name], capture_output=True, text=True)
+        print(f"[cleanup] {container_name} — rc={result.returncode} {result.stderr.strip()}", flush=True)
         try:
             os.close(parent_fd)
         except OSError:

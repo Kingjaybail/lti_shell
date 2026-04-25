@@ -1,4 +1,3 @@
-import { Routes, Route, Navigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import Sidebar from "./components/Sidebar/sidebar.jsx"
 import Terminal from "./components/Terminal/terminal.jsx"
@@ -6,16 +5,26 @@ import Results from "./components/Results/results.jsx"
 import ProfessorView from "./Dashboard/ProfessorView/ProfessorView.jsx"
 import "./App.css"
 
-function StudentShell({ isProfessor, claims, assignment }) {
+function StudentShell({ isProfessor, claims, assignment, onOpenProfessor }) {
   const [activeQuestion, setActiveQuestion] = useState(0)
   const [sessionId, setSessionId] = useState(null)
   const [questionResults, setQuestionResults] = useState({})
+  const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000"
 
   const questions = assignment?.questions ?? []
   const currentQuestion = questions[activeQuestion] ?? null
 
   const passedCount = Object.values(questionResults).filter(Boolean).length
   const grade = questions.length > 0 ? Math.round((passedCount / questions.length) * 100) : 0
+
+  useEffect(() => {
+    if (!sessionId || !questions.length) return
+    fetch(`${apiUrl}/api/session/setup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, question_count: questions.length }),
+    }).catch(() => {})
+  }, [sessionId, questions.length])
 
   function handleQuestionResult(index, passed) {
     setQuestionResults(prev => ({ ...prev, [index]: passed }))
@@ -30,6 +39,7 @@ function StudentShell({ isProfessor, claims, assignment }) {
         activeQuestion={activeQuestion}
         onSelectQuestion={setActiveQuestion}
         questionResults={questionResults}
+        onOpenProfessor={onOpenProfessor}
       />
       <div className="right">
         <div className="terminalPanel">
@@ -62,14 +72,10 @@ function StudentShell({ isProfessor, claims, assignment }) {
   )
 }
 
-function ProfessorRoute({ isProfessor, children }) {
-  if (!isProfessor) return <Navigate to="/" replace />
-  return children
-}
-
 export default function App() {
   const [claims, setClaims] = useState(null)
   const [assignment, setAssignment] = useState(null)
+  const [showProfessor, setShowProfessor] = useState(false)
   const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000"
 
   useEffect(() => {
@@ -118,27 +124,29 @@ export default function App() {
       .catch(err => console.error("Failed to load assignment", err))
   }, [claims])
 
-  const isProfessor = true
+  const roles = claims?.["https://purl.imsglobal.org/spec/lti/claim/roles"] ?? []
+  const isProfessor = roles.length === 0
+    || roles.some(r => r.includes("Instructor") || r.includes("Administrator"))
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={<StudentShell isProfessor={isProfessor} claims={claims} assignment={assignment} />}
+    <>
+      <StudentShell
+        isProfessor={isProfessor}
+        claims={claims}
+        assignment={assignment}
+        onOpenProfessor={() => setShowProfessor(true)}
       />
-      <Route
-        path="/professor"
-        element={
-          <ProfessorRoute isProfessor={isProfessor}>
-            <ProfessorView
-              assignment={assignment}
-              claims={claims}
-              apiUrl={apiUrl}
-              onAssignmentUpdate={setAssignment}
-            />
-          </ProfessorRoute>
-        }
-      />
-    </Routes>
+      {showProfessor && isProfessor && (
+        <div className="professorOverlay">
+          <ProfessorView
+            assignment={assignment}
+            claims={claims}
+            apiUrl={apiUrl}
+            onAssignmentUpdate={setAssignment}
+            onClose={() => setShowProfessor(false)}
+          />
+        </div>
+      )}
+    </>
   )
 }

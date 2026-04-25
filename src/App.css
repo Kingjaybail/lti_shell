@@ -134,3 +134,11 @@ body, html {
   color: var(--fg2);
   font-size: 13px;
 }
+
+.professorOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--bg);
+  overflow-y: auto;
+}

@@ -61,30 +61,88 @@
   margin-top: 12px;
 }
 
-.questionDropdown {
+.customSelect {
+  position: relative;
+  width: 100%;
+}
+
+.customSelectTrigger {
   width: 100%;
   padding: 8px 10px;
+  padding-right: 28px;
   background: var(--bg2);
   color: var(--fg);
   border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 12px;
   cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  padding-right: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  transition: border-color 0.15s;
 }
 
-.questionDropdown:focus {
-  outline: none;
+.customSelectTrigger.passed {
+  border-color: #22c55e;
+  color: #22c55e;
+}
+
+.customSelectTrigger.open {
   border-color: var(--accent);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
-.questionDropdown:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.customSelectTrigger.open.passed {
+  border-color: #22c55e;
+}
+
+.customSelectList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg2);
+  border: 1px solid var(--accent);
+  border-top: none;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  z-index: 50;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.customSelectItem {
+  padding: 7px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.1s;
+}
+
+.customSelectItem:hover {
+  background: var(--bg3);
+}
+
+.customSelectItem.active {
+  background: var(--bg3);
+  font-weight: 600;
+}
+
+.customSelectItem.passed {
+  color: #22c55e;
+}
+
+.qCheck {
+  color: #22c55e;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .questionPromptFull {
@@ -100,8 +158,20 @@
   color: var(--fg2);
 }
 
+.workingDir {
+  margin: 0;
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--accent);
+  background: var(--bg3);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
 .sidebarFooter {
   padding: 12px;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
 }
+
