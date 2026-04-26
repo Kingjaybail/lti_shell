@@ -87,7 +87,7 @@ async def submit_grade(body: GradeRequest):
             "scoreMaximum": 100,
             "activityProgress": "Completed",
             "gradingProgress": "FullyGraded",
-            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         }
         async with httpx.AsyncClient() as client:
             resp = await client.post(
