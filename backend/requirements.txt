@@ -3,6 +3,7 @@ uvicorn
 websockets
 cryptography
 python-jose[cryptography]
+PyJWT[crypto]
 httpx
 python-multipart
 motor

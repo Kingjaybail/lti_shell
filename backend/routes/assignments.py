@@ -3,13 +3,13 @@ import subprocess
 import time
 import uuid
 import httpx
+import jwt as pyjwt
 from datetime import datetime, timezone
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List
-from jose import jwt
 from db import get_db
 from models.assignment import Assignment, Question, TestCase
 from models.course import Course
@@ -42,14 +42,19 @@ class GradeRequest(BaseModel):
 async def get_moodle_token() -> str:
     private_key = get_private_key()
     now = int(datetime.now(timezone.utc).timestamp())
-    assertion = jwt.encode({
-        "iss": CLIENT_ID,
-        "sub": CLIENT_ID,
-        "aud": MOODLE_TOKEN_URL,
-        "iat": now,
-        "exp": now + 60,
-        "jti": str(uuid.uuid4()),
-    }, private_key, algorithm="RS256")
+    assertion = pyjwt.encode(
+        {
+            "iss": CLIENT_ID,
+            "sub": CLIENT_ID,
+            "aud": MOODLE_TOKEN_URL,
+            "iat": now,
+            "exp": now + 60,
+            "jti": str(uuid.uuid4()),
+        },
+        private_key,
+        algorithm="RS256",
+        headers={"kid": "lti-shell-key"},
+    )
     async with httpx.AsyncClient() as client:
         resp = await client.post(MOODLE_TOKEN_URL, data={
             "grant_type": "client_credentials",
