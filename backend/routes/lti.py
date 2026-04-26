@@ -137,6 +137,7 @@ async def lti_launch(request: Request):
             algorithms=["RS256"],
             audience=CLIENT_ID,
             issuer=PLATFORM_ISSUER,
+            options={"leeway": 30},
         )
         print(f"[lti/launch] JWT decoded ok, sub={claims.get('sub')} iss={claims.get('iss')}", flush=True)
     except Exception as e:

@@ -26,6 +26,19 @@ function StudentShell({ isProfessor, claims, assignment, onOpenProfessor }) {
     }).catch(() => {})
   }, [sessionId, questions.length])
 
+  useEffect(() => {
+    const lineitem = claims?.["https://purl.imsglobal.org/spec/lti-ags/claim/endpoint"]?.lineitem
+    const userId = claims?.sub
+    if (!lineitem || !userId || !questions.length) return
+    const score = Math.round((passedCount / questions.length) * 100)
+    
+    fetch(`${apiUrl}/api/grade`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lineitem_url: lineitem, user_id: userId, score }),
+    }).catch(() => {})
+  }, [questionResults])
+
   function handleQuestionResult(index, passed) {
     setQuestionResults(prev => ({ ...prev, [index]: passed }))
   }

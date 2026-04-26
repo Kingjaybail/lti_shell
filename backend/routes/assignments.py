@@ -1,14 +1,21 @@
 import os
 import subprocess
 import time
+import uuid
+import httpx
+from datetime import datetime, timezone
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List
+from jose import jwt
 from db import get_db
 from models.assignment import Assignment, Question, TestCase
 from models.course import Course
+from routes.lti import get_private_key, CLIENT_ID
+
+MOODLE_TOKEN_URL = "https://wku.moodlecloud.com/mod/lti/token.php"
 
 
 class SetupSessionRequest(BaseModel):
@@ -26,7 +33,66 @@ class UpdateQuestionsRequest(BaseModel):
     course_id: str
     questions: List[Question]
 
+class GradeRequest(BaseModel):
+    lineitem_url: str
+    user_id: str
+    score: float
+
+
+async def get_moodle_token() -> str:
+    private_key = get_private_key()
+    now = int(datetime.now(timezone.utc).timestamp())
+    assertion = jwt.encode({
+        "iss": CLIENT_ID,
+        "sub": CLIENT_ID,
+        "aud": MOODLE_TOKEN_URL,
+        "iat": now,
+        "exp": now + 60,
+        "jti": str(uuid.uuid4()),
+    }, private_key, algorithm="RS256")
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(MOODLE_TOKEN_URL, data={
+            "grant_type": "client_credentials",
+            "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+            "client_assertion": assertion,
+            "scope": "https://purl.imsglobal.org/spec/lti-ags/scope/score",
+        })
+    return resp.json()["access_token"]
+
 router = APIRouter(prefix="/api", tags=["assignments"])
+
+
+@router.post("/grade")
+async def submit_grade(body: GradeRequest):
+    try:
+        token = await get_moodle_token()
+    except Exception as e:
+        print(f"[grade] token error: {e}", flush=True)
+        raise HTTPException(status_code=500, detail=f"Token error: {e}")
+    try:
+        score_url = body.lineitem_url.rstrip("/") + "/scores"
+        payload = {
+            "userId": body.user_id,
+            "scoreGiven": body.score,
+            "scoreMaximum": 100,
+            "activityProgress": "Completed",
+            "gradingProgress": "FullyGraded",
+            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        }
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                score_url,
+                json=payload,
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/vnd.ims.lis.v1.score+json",
+                },
+            )
+        print(f"[grade] user={body.user_id} score={body.score} → {resp.status_code}", flush=True)
+        return {"ok": resp.status_code < 300, "status": resp.status_code}
+    except Exception as e:
+        print(f"[grade] submit error: {e}", flush=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/assignment/dev")
