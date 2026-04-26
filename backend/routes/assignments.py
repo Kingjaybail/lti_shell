@@ -1,5 +1,6 @@
 import os
 import subprocess
+import time
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
@@ -45,10 +46,17 @@ async def get_dev_assignment():
 async def setup_session(body: SetupSessionRequest):
     container_name = f"lti-shell-{body.session_id}"
     dirs = " ".join(f"/workspace/q{i}" for i in range(1, body.question_count + 1))
-    subprocess.run(
-        ["docker", "exec", container_name, "bash", "-c", f"mkdir -p {dirs}"],
-        capture_output=True, timeout=5,
-    )
+    for _ in range(10):
+        result = subprocess.run(
+            ["docker", "exec", "-u", "user", container_name, "bash", "-c", f"mkdir -p {dirs}"],
+            capture_output=True, timeout=5,
+        )
+        if result.returncode == 0:
+            print(f"[setup] {container_name} dirs created", flush=True)
+            break
+        time.sleep(0.3)
+    else:
+        print(f"[setup] {container_name} failed to create dirs", flush=True)
     return {"ok": True}
 
 

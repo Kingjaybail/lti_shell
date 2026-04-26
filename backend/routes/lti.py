@@ -118,19 +118,32 @@ async def lti_launch(request: Request):
     id_token = form_data.get("id_token")
 
     if not id_token:
+        print("[lti/launch] missing id_token", flush=True)
         return JSONResponse({"error": "Missing id_token"}, status_code=400)
 
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(PLATFORM_JWKS_URL)
-        jwks = resp.json()
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(PLATFORM_JWKS_URL)
+            jwks = resp.json()
+        print(f"[lti/launch] fetched JWKS ok, keys={len(jwks.get('keys', []))}", flush=True)
+    except Exception as e:
+        print(f"[lti/launch] JWKS fetch failed: {e}", flush=True)
+        return JSONResponse({"error": "Failed to fetch platform keys"}, status_code=502)
 
-    claims = jwt.decode(
-        id_token,
-        jwks,
-        algorithms=["RS256"],
-        audience=CLIENT_ID,
-        issuer=PLATFORM_ISSUER,
-    )
+    try:
+        claims = jwt.decode(
+            id_token,
+            jwks,
+            algorithms=["RS256"],
+            audience=CLIENT_ID,
+            issuer=PLATFORM_ISSUER,
+        )
+        print(f"[lti/launch] JWT decoded ok, sub={claims.get('sub')} iss={claims.get('iss')}", flush=True)
+    except Exception as e:
+        print(f"[lti/launch] JWT decode failed: {e}", flush=True)
+        return JSONResponse({"error": f"Invalid token: {e}"}, status_code=400)
 
     claims_b64 = base64.urlsafe_b64encode(json.dumps(claims).encode()).decode()
-    return RedirectResponse(f"{FRONTEND_URL}?lti_claims={claims_b64}", status_code=302)
+    redirect_url = f"{FRONTEND_URL}?lti_claims={claims_b64}"
+    print(f"[lti/launch] redirecting to frontend, claims length={len(claims_b64)}", flush=True)
+    return RedirectResponse(redirect_url, status_code=302)
