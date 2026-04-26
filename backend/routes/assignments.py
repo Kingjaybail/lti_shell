@@ -79,7 +79,8 @@ async def submit_grade(body: GradeRequest):
         print(f"[grade] token error: {e}", flush=True)
         raise HTTPException(status_code=500, detail=f"Token error: {e}")
     try:
-        score_url = body.lineitem_url.rstrip("/") + "/scores"
+        base, _, qs = body.lineitem_url.partition("?")
+        score_url = base.rstrip("/") + "/scores" + ("?" + qs if qs else "")
         payload = {
             "userId": body.user_id,
             "scoreGiven": body.score,
@@ -97,7 +98,7 @@ async def submit_grade(body: GradeRequest):
                     "Content-Type": "application/vnd.ims.lis.v1.score+json",
                 },
             )
-        print(f"[grade] user={body.user_id} score={body.score} → {resp.status_code}", flush=True)
+        print(f"[grade] user={body.user_id} score={body.score} → {resp.status_code} {resp.text[:200]}", flush=True)
         return {"ok": resp.status_code < 300, "status": resp.status_code}
     except Exception as e:
         print(f"[grade] submit error: {e}", flush=True)
