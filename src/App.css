@@ -101,8 +101,30 @@ body, html {
   padding-bottom: 2px;
 }
 
+.submitGradeBtn {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 10px;
+  border: 1px solid #22c55e;
+  background: transparent;
+  color: #22c55e;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.submitGradeBtn:hover:not(:disabled) {
+  background: #22c55e;
+  color: #000;
+}
+
+.submitGradeBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .gradeChip {
-  margin-left: auto;
   font-size: 12px;
   font-weight: 600;
   color: var(--accent);

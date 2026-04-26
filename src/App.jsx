@@ -9,6 +9,7 @@ function StudentShell({ isProfessor, claims, assignment, onOpenProfessor }) {
   const [activeQuestion, setActiveQuestion] = useState(0)
   const [sessionId, setSessionId] = useState(null)
   const [questionResults, setQuestionResults] = useState({})
+  const [gradeStatus, setGradeStatus] = useState(null)
   const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000"
 
   const questions = assignment?.questions ?? []
@@ -26,21 +27,27 @@ function StudentShell({ isProfessor, claims, assignment, onOpenProfessor }) {
     }).catch(() => {})
   }, [sessionId, questions.length])
 
-  useEffect(() => {
+  async function submitGrade() {
     const lineitem = claims?.["https://purl.imsglobal.org/spec/lti-ags/claim/endpoint"]?.lineitem
     const userId = claims?.sub
-    if (!lineitem || !userId || !questions.length) return
-    const score = Math.round((passedCount / questions.length) * 100)
-    
-    fetch(`${apiUrl}/api/grade`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lineitem_url: lineitem, user_id: userId, score }),
-    }).catch(() => {})
-  }, [questionResults])
+    if (!lineitem || !userId) return
+    setGradeStatus("submitting")
+    try {
+      const res = await fetch(`${apiUrl}/api/grade`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lineitem_url: lineitem, user_id: userId, score: grade }),
+      })
+      const data = await res.json()
+      setGradeStatus(data.ok ? "submitted" : "error")
+    } catch {
+      setGradeStatus("error")
+    }
+  }
 
   function handleQuestionResult(index, passed) {
     setQuestionResults(prev => ({ ...prev, [index]: passed }))
+    setGradeStatus(null)
   }
 
   return (
@@ -69,6 +76,15 @@ function StudentShell({ isProfessor, claims, assignment, onOpenProfessor }) {
               <span className="gradeChip">
                 {passedCount}/{questions.length} &mdash; {grade}%
               </span>
+            )}
+            {(claims?.["https://purl.imsglobal.org/spec/lti-ags/claim/endpoint"]?.lineitem || import.meta.env.VITE_SHOW_GRADE_BTN === "true") && (
+              <button
+                className="submitGradeBtn"
+                onClick={submitGrade}
+                disabled={gradeStatus === "submitting"}
+              >
+                {gradeStatus === "submitting" ? "Submitting…" : gradeStatus === "submitted" ? "Submitted ✓" : gradeStatus === "error" ? "Error — Retry" : "Submit"}
+              </button>
             )}
           </div>
           <div className="resultsBody">
