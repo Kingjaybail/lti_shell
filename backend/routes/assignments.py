@@ -57,7 +57,11 @@ async def get_moodle_token() -> str:
             "client_assertion": assertion,
             "scope": "https://purl.imsglobal.org/spec/lti-ags/scope/score",
         })
-    return resp.json()["access_token"]
+    data = resp.json()
+    print(f"[token] status={resp.status_code} response={data}", flush=True)
+    if "access_token" not in data:
+        raise Exception(f"Moodle token error: {data}")
+    return data["access_token"]
 
 router = APIRouter(prefix="/api", tags=["assignments"])
 
