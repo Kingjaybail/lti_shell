@@ -77,7 +77,7 @@ function StudentShell({ isProfessor, claims, assignment, onOpenProfessor }) {
                 {passedCount}/{questions.length} &mdash; {grade}%
               </span>
             )}
-            {(claims?.["https://purl.imsglobal.org/spec/lti-ags/claim/endpoint"]?.lineitem || import.meta.env.VITE_SHOW_GRADE_BTN === "true") && (
+            {claims?.["https://purl.imsglobal.org/spec/lti-ags/claim/endpoint"]?.lineitem && (
               <button
                 className="submitGradeBtn"
                 onClick={submitGrade}
