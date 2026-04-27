@@ -1,4 +1,5 @@
 import os
+import json as _json
 import subprocess
 import time
 import uuid
@@ -82,23 +83,24 @@ async def submit_grade(body: GradeRequest):
         base, _, qs = body.lineitem_url.partition("?")
         score_url = base.rstrip("/") + "/scores" + ("?" + qs if qs else "")
         payload = {
-            "userId": body.user_id,
-            "scoreGiven": body.score,
-            "scoreMaximum": 100,
+            "userId": str(body.user_id),
+            "scoreGiven": float(body.score),
+            "scoreMaximum": 100.0,
             "activityProgress": "Completed",
             "gradingProgress": "FullyGraded",
-            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
         }
+        print(f"[grade] score_url={score_url} payload={_json.dumps(payload)}", flush=True)
         async with httpx.AsyncClient() as client:
             resp = await client.post(
                 score_url,
-                json=payload,
+                content=_json.dumps(payload).encode(),
                 headers={
                     "Authorization": f"Bearer {token}",
                     "Content-Type": "application/vnd.ims.lis.v1.score+json",
                 },
             )
-        print(f"[grade] user={body.user_id} score={body.score} → {resp.status_code} {resp.text[:200]}", flush=True)
+        print(f"[grade] user={body.user_id} score={body.score} → {resp.status_code} {resp.text[:500]}", flush=True)
         # 409 means Moodle already has a FullyGraded score for this user — treat as success
         return {"ok": resp.status_code < 300 or resp.status_code == 409, "status": resp.status_code}
     except Exception as e:
