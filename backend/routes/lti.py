@@ -9,18 +9,18 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
 from jose import jwt
 
-PLATFORM_ISSUER = "https://wku.moodlecloud.com"
-CLIENT_ID = "6MHXhJtCVMVV4gp"
-AUTH_LOGIN_URL = "https://wku.moodlecloud.com/mod/lti/auth.php"
-PLATFORM_JWKS_URL = "https://wku.moodlecloud.com/mod/lti/certs.php"
-TOOL_LAUNCH_URL = "https://api.stushellbackend.xyz/lti/launch"
-FRONTEND_URL = "https://stushell.vercel.app/"
-
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
 LOCAL = os.getenv("LOCAL", "false").lower() == "true"
+PLATFORM_ISSUER = os.getenv("PLATFORM_ISSUER", "https://wku.moodlecloud.com")
+CLIENT_ID = os.getenv("CLIENT_ID", "6MHXhJtCVMVV4gp")
+AUTH_LOGIN_URL = os.getenv("AUTH_LOGIN_URL", f"{PLATFORM_ISSUER}/mod/lti/auth.php")
+PLATFORM_JWKS_URL = os.getenv("PLATFORM_JWKS_URL", f"{PLATFORM_ISSUER}/mod/lti/certs.php")
+TOOL_LAUNCH_URL = os.getenv("TOOL_LAUNCH_URL", "https://api.stushellbackend.xyz/lti/launch")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://stushell.vercel.app/")
 
 if LOCAL:
     _key_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

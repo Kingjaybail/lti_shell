@@ -15,7 +15,7 @@ from models.assignment import Assignment, Question, TestCase
 from models.course import Course
 from routes.lti import get_private_key, CLIENT_ID
 
-MOODLE_TOKEN_URL = "https://wku.moodlecloud.com/mod/lti/token.php"
+MOODLE_TOKEN_URL = os.getenv("MOODLE_TOKEN_URL", "https://wku.moodlecloud.com/mod/lti/token.php")
 
 
 class SetupSessionRequest(BaseModel):
@@ -99,7 +99,8 @@ async def submit_grade(body: GradeRequest):
                 },
             )
         print(f"[grade] user={body.user_id} score={body.score} → {resp.status_code} {resp.text[:200]}", flush=True)
-        return {"ok": resp.status_code < 300, "status": resp.status_code}
+        # 409 means Moodle already has a FullyGraded score for this user — treat as success
+        return {"ok": resp.status_code < 300 or resp.status_code == 409, "status": resp.status_code}
     except Exception as e:
         print(f"[grade] submit error: {e}", flush=True)
         raise HTTPException(status_code=500, detail=str(e))
