@@ -39,6 +39,13 @@ class GradeRequest(BaseModel):
     user_id: str
     score: float
 
+class ProgressSaveRequest(BaseModel):
+    user_id: str
+    assignment_id: str
+    course_id: str
+    question_index: int
+    passed: bool
+
 
 async def get_moodle_token() -> str:
     private_key = get_private_key()
@@ -61,7 +68,7 @@ async def get_moodle_token() -> str:
             "grant_type": "client_credentials",
             "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
             "client_assertion": assertion,
-            "scope": "https://purl.imsglobal.org/spec/lti-ags/scope/score",
+            "scope": "https://purl.imsglobal.org/spec/lti-ags/scope/score https://purl.imsglobal.org/spec/lti-ags/scope/lineitem https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
         })
     data = resp.json()
     print(f"[token] status={resp.status_code} response={data}", flush=True)
@@ -90,6 +97,16 @@ async def submit_grade(body: GradeRequest):
             "gradingProgress": "FullyGraded",
             "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
         }
+        async with httpx.AsyncClient() as client:
+            li_resp = await client.get(
+                body.lineitem_url,
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Accept": "application/vnd.ims.lis.v2.lineitem+json",
+                },
+            )
+        print(f"[grade] GET lineitem → {li_resp.status_code} {li_resp.text[:300]}", flush=True)
+
         print(f"[grade] score_url={score_url} payload={_json.dumps(payload)}", flush=True)
         async with httpx.AsyncClient() as client:
             resp = await client.post(
@@ -100,12 +117,42 @@ async def submit_grade(body: GradeRequest):
                     "Content-Type": "application/vnd.ims.lis.v1.score+json",
                 },
             )
-        print(f"[grade] user={body.user_id} score={body.score} → {resp.status_code} {resp.text[:500]}", flush=True)
+        print(f"[grade] user={body.user_id} score={body.score} → {resp.status_code} headers={dict(resp.headers)} body={resp.text[:500]}", flush=True)
         # 409 means Moodle already has a FullyGraded score for this user — treat as success
         return {"ok": resp.status_code < 300 or resp.status_code == 409, "status": resp.status_code}
     except Exception as e:
         print(f"[grade] submit error: {e}", flush=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/progress")
+async def get_progress(
+    user_id: str = Query(...),
+    assignment_id: str = Query(...),
+    course_id: str = Query(...),
+):
+    db = get_db()
+    doc = await db["Progress"].find_one({
+        "user_id": user_id,
+        "assignment_id": assignment_id,
+        "course_id": course_id,
+    })
+    return {"results": doc.get("results", {}) if doc else {}}
+
+
+@router.post("/progress")
+async def save_progress(body: ProgressSaveRequest):
+    db = get_db()
+    await db["Progress"].update_one(
+        {
+            "user_id": body.user_id,
+            "assignment_id": body.assignment_id,
+            "course_id": body.course_id,
+        },
+        {"$set": {f"results.{body.question_index}": body.passed}},
+        upsert=True,
+    )
+    return {"ok": True}
 
 
 @router.get("/assignment/dev")

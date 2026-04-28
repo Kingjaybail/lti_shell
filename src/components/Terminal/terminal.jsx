@@ -4,7 +4,7 @@ import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
 import "./terminal.css";
 
-export default function Terminal({ onSession }) {
+export default function Terminal({ onSession, userId, userName }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -25,7 +25,10 @@ export default function Terminal({ onSession }) {
     term.focus();
 
     const wsUrl = import.meta.env.VITE_WS_URL;
-    const ws = new WebSocket(`${wsUrl}/ws/terminal`);
+    const params = new URLSearchParams()
+    if (userId != null) params.set("user_id", String(userId))
+    if (userName) params.set("user_name", userName)
+    const ws = new WebSocket(`${wsUrl}/ws/terminal?${params.toString()}`);
     ws.binaryType = "arraybuffer";
 
     const sendResize = (cols, rows) => {

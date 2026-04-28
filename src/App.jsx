@@ -27,6 +27,17 @@ function StudentShell({ isProfessor, claims, assignment, onOpenProfessor }) {
     }).catch(() => {})
   }, [sessionId, questions.length])
 
+  useEffect(() => {
+    const userId = claims?.sub
+    const assignmentId = assignment?.moodle_resource_id
+    const courseId = assignment?.moodle_course_id
+    if (!userId || !assignmentId || !courseId) return
+    fetch(`${apiUrl}/api/progress?user_id=${userId}&assignment_id=${assignmentId}&course_id=${courseId}`)
+      .then(r => r.json())
+      .then(data => { if (data.results) setQuestionResults(data.results) })
+      .catch(() => {})
+  }, [claims?.sub, assignment?.moodle_resource_id, assignment?.moodle_course_id])
+
   async function submitGrade() {
     const lineitem = claims?.["https://purl.imsglobal.org/spec/lti-ags/claim/endpoint"]?.lineitem
     const userId = claims?.sub
@@ -48,6 +59,16 @@ function StudentShell({ isProfessor, claims, assignment, onOpenProfessor }) {
   function handleQuestionResult(index, passed) {
     setQuestionResults(prev => ({ ...prev, [index]: passed }))
     setGradeStatus(null)
+    const userId = claims?.sub
+    const assignmentId = assignment?.moodle_resource_id
+    const courseId = assignment?.moodle_course_id
+    if (userId && assignmentId && courseId) {
+      fetch(`${apiUrl}/api/progress`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: String(userId), assignment_id: assignmentId, course_id: courseId, question_index: index, passed }),
+      }).catch(() => {})
+    }
   }
 
   return (
@@ -66,7 +87,11 @@ function StudentShell({ isProfessor, claims, assignment, onOpenProfessor }) {
           <div className="panelHeader">
             <span className="active">Terminal</span>
           </div>
-          <Terminal onSession={setSessionId} />
+          <Terminal
+            onSession={setSessionId}
+            userId={claims?.sub}
+            userName={claims?.name || claims?.given_name || "user"}
+          />
         </div>
 
         <div className="resultsPanel">
@@ -77,7 +102,7 @@ function StudentShell({ isProfessor, claims, assignment, onOpenProfessor }) {
                 {passedCount}/{questions.length} &mdash; {grade}%
               </span>
             )}
-            {claims?.["https://purl.imsglobal.org/spec/lti-ags/claim/endpoint"]?.lineitem && (
+            {!isProfessor && claims?.["https://purl.imsglobal.org/spec/lti-ags/claim/endpoint"]?.lineitem && (
               <button
                 className="submitGradeBtn"
                 onClick={submitGrade}

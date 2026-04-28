@@ -7,6 +7,10 @@ services:
       - "8000:8000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./routes:/app/routes
+      - ./models:/app/models
+      - ./main.py:/app/main.py
+      - ./db.py:/app/db.py
     env_file:
       - .env
     environment:

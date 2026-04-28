@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 # Adds a work user I plan to update the 2nd echo with the students name later on
 RUN useradd -m -s /bin/bash user
 RUN echo 'export TERM=xterm-256color' >> /home/user/.bashrc
-RUN echo 'export PS1="user@lti-shell:~\$ "' >> /home/user/.bashrc
+RUN echo 'export PS1="${USER_NAME:-user}@lti-shell:~\$ "' >> /home/user/.bashrc
 
 USER user
 WORKDIR /workspace

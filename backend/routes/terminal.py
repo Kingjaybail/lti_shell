@@ -23,19 +23,29 @@ router = APIRouter(tags=["terminal"])
 @router.websocket("/ws/terminal")
 async def terminal_ws(websocket: WebSocket):
     await websocket.accept()
+
+    raw_user_id = websocket.query_params.get("user_id", "")
+    raw_user_name = websocket.query_params.get("user_name", "user")
+
+    safe_user_id = "".join(c for c in str(raw_user_id) if c.isalnum() or c == "-")[:50]
+    safe_user_name = "".join(c for c in str(raw_user_name) if c.isalnum() or c in " _-")[:30].strip().replace(" ", "_") or "user"
+
+    volume_name = f"workspace-{safe_user_id}" if safe_user_id else None
+
     session_id = uuid.uuid4().hex[:8]
     await websocket.send_text(json.dumps({"type": "session", "id": session_id}))
 
     if LOCAL:
-        await _local_docker_terminal(websocket, session_id)
+        await _local_docker_terminal(websocket, session_id, volume_name, safe_user_name)
     else:
-        await _pty_docker_terminal(websocket, session_id)
+        await _pty_docker_terminal(websocket, session_id, volume_name, safe_user_name)
 
 
-async def _local_docker_terminal(websocket: WebSocket, session_id: str):
+async def _local_docker_terminal(websocket: WebSocket, session_id: str, volume_name: str | None, user_name: str):
     """Docker terminal for local Windows — pipes instead of PTY."""
     container_name = f"lti-shell-{session_id}"
 
+    volume_args = ["-v", f"{volume_name}:/workspace"] if volume_name else []
     proc = subprocess.Popen(
         [
             "docker", "run", "--rm", "-i",
@@ -43,6 +53,8 @@ async def _local_docker_terminal(websocket: WebSocket, session_id: str):
             "--network", "none",
             "--memory", "256m",
             "--cpus", "0.5",
+            "-e", f"USER_NAME={user_name}",
+            *volume_args,
             "-w", "/workspace",
             "lti-shell:latest",
             "/bin/bash",
@@ -98,19 +110,22 @@ async def _local_docker_terminal(websocket: WebSocket, session_id: str):
         print(f"[cleanup] {container_name} — rc={result.returncode} {result.stderr.strip()}", flush=True)
 
 
-async def _pty_docker_terminal(websocket: WebSocket, session_id: str):
+async def _pty_docker_terminal(websocket: WebSocket, session_id: str, volume_name: str | None, user_name: str):
     """Full PTY-backed Docker terminal for Linux/production."""
     parent_fd, child_fd = pty.openpty()
     container_name = f"lti-shell-{session_id}"
 
+    volume_args = ["-v", f"{volume_name}:/workspace"] if volume_name else []
     proc = subprocess.Popen(
         [
             "docker", "run", "--rm", "-it",
             "--name", container_name,
             "-e", "TERM=xterm-256color",
+            "-e", f"USER_NAME={user_name}",
             "--network", "none",
             "--memory", "256m",
             "--cpus", "0.5",
+            *volume_args,
             "-w", "/workspace",
             "lti-shell:latest",
             "/bin/bash",
