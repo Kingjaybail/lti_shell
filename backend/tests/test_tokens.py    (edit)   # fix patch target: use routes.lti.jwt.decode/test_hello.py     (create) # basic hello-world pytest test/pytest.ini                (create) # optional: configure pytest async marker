@@ -1,0 +1,15 @@
+def test_token_decode():
+    from routes.lti.jwt import decode
+    assert decode("some_token") is not None
+
+def test_token_decode_failure():
+    from routes.lti.jwt import decode
+    assert decode("invalid_token") is None
+
+def test_token_decode_edge_case():
+    from routes.lti.jwt import decode
+    assert decode("") is None
+
+[pytest]
+markers =
+    async: mark test as async for pytest-asyncio

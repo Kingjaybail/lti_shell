@@ -8,3 +8,4 @@ httpx
 python-multipart
 motor
 python-dotenv
+pytest

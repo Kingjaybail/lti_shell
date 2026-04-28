@@ -1,5 +1,6 @@
 import json
 import base64
+from urllib import request, response
 import pytest
 from unittest.mock import patch
 from fastapi.responses import RedirectResponse, JSONResponse
@@ -143,8 +144,10 @@ async def test_lti_launch_invalid_token_raises():
 
     with patch("routes.lti.httpx.AsyncClient", return_value=FakeClient()):
         with patch("routes.lti.jwt.decode", side_effect=Exception("Invalid token")):
-            with pytest.raises(Exception):
-                await lti_launch(request)
+            response = await lti_launch(request)
+
+    assert isinstance(response, JSONResponse)
+    assert response.status_code in (400, 401)
 
 
 def test_lti_jwks_returns_keys():
