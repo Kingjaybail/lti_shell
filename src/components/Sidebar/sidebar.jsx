@@ -93,7 +93,7 @@ export default function Sidebar({ isProfessor, claims, assignment, activeQuestio
             </p>
           </>
         )}
-        {!selected && <p className="emptyState">No assignment selected.</p>}
+        {!selected && <p className="emptyState">No questions loaded.</p>}
       </div>
 
       <footer className="sidebarFooter">

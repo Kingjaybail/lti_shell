@@ -178,11 +178,13 @@ export default function ProfessorView({ assignment, claims, apiUrl, onAssignment
                     onChange={e => handleTestCaseChange(tcIdx, "input", e.target.value)}
                     required
                   />
-                  <input
+                  <textarea
                     placeholder="Expected output"
+                    rows={3}
                     value={tc.expected_output}
                     onChange={e => handleTestCaseChange(tcIdx, "expected_output", e.target.value)}
                     required
+                    style={{ resize: "vertical", fontFamily: "monospace" }}
                   />
                   <input
                     placeholder=""
