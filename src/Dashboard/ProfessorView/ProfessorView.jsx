@@ -186,11 +186,6 @@ export default function ProfessorView({ assignment, claims, apiUrl, onAssignment
                     required
                     style={{ resize: "vertical", fontFamily: "monospace" }}
                   />
-                  <input
-                    placeholder=""
-                    value={tc.stdin ?? ""}
-                    onChange={e => handleTestCaseChange(tcIdx, "stdin", e.target.value)}
-                  />
                 </div>
                 {formData.test_cases.length > 1 && (
                   <button type="button" className="btn btn-danger" style={{ padding: "4px 8px", marginTop: 8, fontSize: 11 }} onClick={() => removeTestCase(tcIdx)}>✕</button>
